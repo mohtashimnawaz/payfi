@@ -16,6 +16,9 @@ pub mod payfi {
         let admin_account = &mut ctx.accounts.admin;
         admin_account.authority = admin;
         admin_account.deny_list = vec![];
+        admin_account.verifier_mode = 0u8; // 0 = off, 1 = stub
+        admin_account.verifier_magic = vec![];
+        admin_account.paused = false;
         admin_account.bump = admin_bump;
 
         let vault_account = &mut ctx.accounts.vault;
@@ -34,7 +37,42 @@ pub mod payfi {
         Ok(())
     }
 
+    pub fn set_verifier_mode(ctx: Context<SetVerifierMode>, mode: u8, magic: Option<Vec<u8>>) -> Result<()> {
+        let admin = &mut ctx.accounts.admin;
+        require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
+        admin.verifier_mode = mode;
+        admin.verifier_magic = magic.unwrap_or_default();
+        Ok(())
+    }
+
+    pub fn add_to_denylist(ctx: Context<ModifyDenyList>, addr: Pubkey) -> Result<()> {
+        let admin = &mut ctx.accounts.admin;
+        require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
+        if !admin.deny_list.iter().any(|a| a == &addr) {
+            admin.deny_list.push(addr);
+        }
+        Ok(())
+    }
+
+    pub fn remove_from_denylist(ctx: Context<ModifyDenyList>, addr: Pubkey) -> Result<()> {
+        let admin = &mut ctx.accounts.admin;
+        require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
+        admin.deny_list.retain(|a| a != &addr);
+        Ok(())
+    }
+
+    pub fn set_pause(ctx: Context<SetPause>, paused: bool) -> Result<()> {
+        let admin = &mut ctx.accounts.admin;
+        require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
+        admin.paused = paused;
+        Ok(())
+    }
+
     pub fn deposit(ctx: Context<Deposit>, amount: u64, commitment: [u8;32], encrypted_note: Option<Vec<u8>>) -> Result<()> {
+        // Deny-list check: disallow depositors on deny list
+        let admin = &ctx.accounts.admin;
+        require!(!admin.deny_list.iter().any(|a| a == &ctx.accounts.user.key()), ErrorCode::DenyListBlocked);
+
         // Transfer tokens from user to vault
         let cpi_accounts = Transfer {
             from: ctx.accounts.from.to_account_info(),
@@ -58,9 +96,23 @@ pub mod payfi {
     }
 
     pub fn withdraw(ctx: Context<Withdraw>, proof: Vec<u8>, nullifier: [u8;32], root: [u8;32], amount: u64) -> Result<()> {
-        // TODO: Verify proof (Noir verifier integration)
-        // For now, ensure provided root matches on-chain root
+        let admin = &mut ctx.accounts.admin;
+        // pause check
+        require!(!admin.paused, ErrorCode::ContractPaused);
+
+        // recipient deny-list check
+        require!(!admin.deny_list.iter().any(|a| a == &ctx.accounts.recipient_token_account.owner), ErrorCode::DenyListBlocked);
+
+        // Verify root
         require!(ctx.accounts.tree_state.root == root, ErrorCode::RootMismatch);
+
+        // Proof verification stub (devnet): if stub mode enabled, proof must match magic
+        if admin.verifier_mode == 1u8 {
+            require!(admin.verifier_magic.len() > 0 && proof == admin.verifier_magic, ErrorCode::InvalidProof);
+        } else {
+            // when off, require non-empty proof (placeholder)
+            require!(proof.len() > 0, ErrorCode::InvalidProof);
+        }
 
         // Ensure nullifier not used
         let nullifier_set = &mut ctx.accounts.nullifier_set;
@@ -90,7 +142,7 @@ pub mod payfi {
 #[derive(Accounts)]
 #[instruction(admin: Pubkey)]
 pub struct Initialize<'info> {
-    #[account(init, payer = payer, space = 8 + 32 + (4 + 32 * 10), seeds = [ADMIN_SEED], bump)]
+    #[account(init, payer = payer, space = 8 + 32 + (4 + 32 * 10) + 1 + (4 + 64), seeds = [ADMIN_SEED], bump)]
     pub admin: Account<'info, Admin>,
     #[account(init, payer = payer, space = 8 + 32 + 1, seeds = [TREE_STATE_SEED], bump)]
     pub tree_state: Account<'info, TreeState>,
@@ -113,6 +165,9 @@ pub struct Deposit<'info> {
     #[account(mut, constraint = from.owner == user.key())]
     pub from: Account<'info, TokenAccount>,
 
+    #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump)]
+    pub admin: Account<'info, Admin>,
+
     /// CHECK: vault PDA account - authority for transfers
     #[account(mut)]
     pub vault: Account<'info, Vault>,
@@ -134,6 +189,9 @@ pub struct Withdraw<'info> {
     #[account(mut, seeds = [NULLIFIER_SET_SEED], bump = nullifier_set.bump)]
     pub nullifier_set: Account<'info, NullifierSet>,
 
+    #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump, has_one = authority)]
+    pub admin: Account<'info, Admin>,
+
     /// CHECK: vault PDA
     #[account(mut, seeds = [VAULT_SEED], bump = vault.bump)]
     pub vault: Account<'info, Vault>,
@@ -148,6 +206,27 @@ pub struct Withdraw<'info> {
     pub tree_state: Account<'info, TreeState>,
 
     pub token_program: Program<'info, Token>,
+}
+
+#[derive(Accounts)]
+pub struct SetVerifierMode<'info> {
+    #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump, has_one = authority)]
+    pub admin: Account<'info, Admin>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct ModifyDenyList<'info> {
+    #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump, has_one = authority)]
+    pub admin: Account<'info, Admin>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct SetPause<'info> {
+    #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump, has_one = authority)]
+    pub admin: Account<'info, Admin>,
+    pub authority: Signer<'info>,
 }
 
 #[account]
@@ -172,6 +251,9 @@ pub struct NullifierSet {
 pub struct Admin {
     pub authority: Pubkey,
     pub deny_list: Vec<Pubkey>,
+    pub verifier_mode: u8,
+    pub verifier_magic: Vec<u8>,
+    pub paused: bool,
     pub bump: u8,
 }
 
@@ -192,4 +274,12 @@ pub enum ErrorCode {
     RootMismatch,
     #[msg("Nullifier already used")]
     NullifierAlreadyUsed,
+    #[msg("Unauthorized")]
+    Unauthorized,
+    #[msg("Address is on deny list")]
+    DenyListBlocked,
+    #[msg("Invalid proof")]
+    InvalidProof,
+    #[msg("Contract is paused")]
+    ContractPaused,
 }

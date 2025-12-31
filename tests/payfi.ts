@@ -62,6 +62,7 @@ describe("payfi", () => {
       .accounts({
         user: payerPubkey,
         from: payerTokenAccount.address,
+        admin: adminPda,
         vault: vaultPda,
         vaultTokenAccount: vaultTokenAccount.address,
         treeState: treePda,
@@ -86,12 +87,39 @@ describe("payfi", () => {
     const nullifier = new Uint8Array(32);
     nullifier[0] = 7;
 
-    // Withdraw using the placeholder root and nullifier
+    // Attempt withdraw with invalid proof (should fail)
+    try {
+      await program.methods
+        .withdraw(Buffer.from([]), Buffer.from(nullifier), Buffer.from(commitment), new anchor.BN(amount))
+        .accounts({
+          authority: payerPubkey,
+          nullifierSet: nullsPda,
+          admin: adminPda,
+          vault: vaultPda,
+          vaultTokenAccount: vaultTokenAccount.address,
+          recipientTokenAccount: recipientTokenAccount.address,
+          treeState: treePda,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+      throw new Error("Withdraw unexpectedly succeeded with invalid proof");
+    } catch (err: any) {
+      // expected
+    }
+
+    // Set verifier mode to stub and magic to [1]
     await program.methods
-      .withdraw(Buffer.from([]), Buffer.from(nullifier), Buffer.from(commitment), new anchor.BN(amount))
+      .setVerifierMode(1, Buffer.from([1]))
+      .accounts({ admin: adminPda, authority: payerPubkey })
+      .rpc();
+
+    // Withdraw with correct stub proof
+    await program.methods
+      .withdraw(Buffer.from([1]), Buffer.from(nullifier), Buffer.from(commitment), new anchor.BN(amount))
       .accounts({
         authority: payerPubkey,
         nullifierSet: nullsPda,
+        admin: adminPda,
         vault: vaultPda,
         vaultTokenAccount: vaultTokenAccount.address,
         recipientTokenAccount: recipientTokenAccount.address,

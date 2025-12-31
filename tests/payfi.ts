@@ -183,6 +183,8 @@ describe("payfi", () => {
 
     const nullifier2 = new Uint8Array(32);
     nullifier2[0] = 9;
+    // ensure this targets a different chunk than the first (set second byte so prefix >= 256)
+    nullifier2[1] = 1;
 
     const prefix2 = Number(Buffer.from(nullifier2.slice(0, 8)).readBigUInt64LE(0));
     const chunkIndex2 = Math.floor(prefix2 / 256);

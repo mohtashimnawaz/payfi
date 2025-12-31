@@ -6,11 +6,15 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "prove:run": "node scripts/run_proof.js"
+    "prove:run": "node scripts/run_proof.js",
+    "show:proof": "node scripts/fetch_and_show_proof.js",
+    "generate-vectors": "node ../../zk/noir/generate_poseidon_vectors.js"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "next": "^13.4.0"
+    "next": "^13.4.0",
+    "circomlibjs": "^0.0.8",
+    "@noir-lang/noir_wasm": "^0.1.0"
   }
 }

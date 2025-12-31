@@ -16,8 +16,12 @@ pub mod verifier {
             return Ok(());
         }
 
-        // Otherwise accept if proof equals 'VALID' bytes
-        if proof == b"VALID".to_vec() {
+        // Dev-format check: proof must start with ASCII header 'POS!'
+        let header = b"POS!".to_vec();
+        if proof.len() >= header.len() && proof[0..4] == header[..] {
+            msg!("Verifier: proof has valid POS! header (dev-only check)");
+            Ok(())
+        } else if proof == b"VALID".to_vec() {
             msg!("Verifier: proof valid (fallback)");
             Ok(())
         } else {

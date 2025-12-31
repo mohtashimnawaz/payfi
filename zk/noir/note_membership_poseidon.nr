@@ -9,10 +9,14 @@
 // poseidon(inputs: [Field]) -> Field  -- assumed available from stdlib
 
 fn poseidon_hash2(a: Field, b: Field) -> Field {
-    // In practice call the library Poseidon; placeholder wrapper here to clarify intent
-    // Replace with: poseidon([a, b]) when using the std hash API
-    // For example: let arr = [a, b]; poseidon(arr)
-    a * 31 + b * 17 // fallback (should be replaced) - kept for local compile demos
+    // Use the standard Poseidon primitive (stdlib) when available.
+    // Noir's stdlib exposes `poseidon` which takes an array of Fields.
+    // If your `noirc` version supports it, the following will compile:
+    // let arr = [a, b];
+    // poseidon(arr)
+
+    // Fallback for environments where Poseidon isn't available at build time:
+    a * 31 + b * 17 // NOTE: fallback - replace with the real Poseidon call in production
 }
 
 pub fn main(private leaf: Field, private path_hashes: Field, private index: Field, public root: Field, public nullifier: Field, private secret: Field) -> Field {

@@ -10,9 +10,9 @@ What I added now (scaffold):
 
 Next steps:
 1) Implement secure hash function (Poseidon/Pedersen) in Noir circuit for real commitments
-2) Build WASM & JS bindings integration - use official `noir_wasm`/`noir_js` bindings for browser
-3) Add E2E test: generate proof (WASM), serialize, and call `programs/verifier` CPI stub to accept and check format
-4) Add CI job to build noir wasm and run proof tests on PRs
+2) Build WASM & JS bindings integration - use official `noir_wasm`/`noir_js` bindings for browser and add a small Next.js page that demonstrates loading a proof and showing the proof size.
+3) Add E2E test: generate proof (WASM), serialize, and call `programs/verifier` CPI stub to accept and check format (proof format checking only for now).
+4) Add CI job to build noir wasm and run proof tests on PRs (test `tests/noir_proof.test.ts` will run `make build-poseidon && make prove-poseidon`)
 
 How you run the demo locally:
 - Install Noir toolchain (see https://noir-lang.org/docs)

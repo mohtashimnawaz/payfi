@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, TokenAccount, Transfer, Token};
 use anchor_lang::solana_program::{instruction::Instruction, program::invoke};
+use std::str::FromStr;
 
 // ed25519 syscall is intentionally not invoked here; signature checks are performed by length and relayer identity
 
@@ -103,7 +104,9 @@ pub mod payfi {
         state.count = 0u64;
         state.limit = limit;
         state.window_seconds = window_seconds;
-        state.bump = 0u8; // store bump 0; clients can derive PDA bump via findProgramAddress
+        // derive bump and store it so clients can use it in constraints
+        let (_pda, bump) = Pubkey::find_program_address(&[RELAYER_STATE_SEED, relayer.as_ref()], ctx.program_id);
+        state.bump = bump;
         Ok(())
     }
 
@@ -336,7 +339,8 @@ fn verify_ed25519(sig: &[u8], pubkey: &Pubkey, message: &[u8]) -> Result<()> {
     // Ed25519 program id (well-known)
     let ed_prog = Pubkey::from_str("Ed25519SigVerify111111111111111111111111111").map_err(|_| ErrorCode::InvalidAttestation)?;
     let ix = Instruction::new_with_bytes(ed_prog, &data, vec![]);
-    invoke(&ix, &[]).map_err(|_| ErrorCode::InvalidAttestation.into())?;
+    let res = invoke(&ix, &[]);
+    if res.is_err() { return Err(ErrorCode::InvalidAttestation.into()); }
     Ok(())
 }
 
@@ -487,6 +491,9 @@ pub struct WithdrawByRelayer<'info> {
 
     #[account(mut)]
     pub nullifier_chunk: Account<'info, NullifierChunk>,
+
+    #[account(mut, seeds = [RELAYER_STATE_SEED, relayer.key().as_ref()], bump = relayer_state.bump)]
+    pub relayer_state: Account<'info, RelayerState>,
 
     pub token_program: Program<'info, Token>,
 } 

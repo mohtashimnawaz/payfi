@@ -216,13 +216,23 @@ describe("payfi", () => {
       .accounts({ admin: adminPda, authority: payerPubkey })
       .rpc();
 
+    // For now we do not require on-chain relayer_state for withdraw flow (rate-limiting will be added later)
+    // Relayer is registered below and will sign the withdraw transaction.
+
     // initialize relayer state (PDA) and set a small rate limit for test
     const relayerWindow = 60; // seconds
     const relayerLimit = 1; // allow only 1 withdraw per window
 
-    // For now we do not require on-chain relayer_state for withdraw flow (rate-limiting will be added later)
-    // Relayer is registered below and will sign the withdraw transaction.
+    const relayerSeed = Buffer.from("relayer_state");
+    const [relayerStatePda, relayerStateBump] = await PublicKey.findProgramAddress([
+      relayerSeed,
+      relayer.publicKey.toBuffer(),
+    ], program.programId);
 
+    await program.methods
+      .initRelayerState(relayer.publicKey, new anchor.BN(relayerLimit), new anchor.BN(relayerWindow))
+      .accounts({ relayerState: relayerStatePda, payer: payerPubkey, systemProgram: SystemProgram.programId })
+      .rpc();
 
     // Build attestation message and signature (nullifier || root || recipient_pubkey || amount || expiry)
     const nacl = require('tweetnacl');
@@ -238,7 +248,7 @@ describe("payfi", () => {
     // Relayer performs withdraw (signer)
     await program.methods
       .withdrawByRelayer(Buffer.from(nullifier2), Buffer.from(commitment2), new anchor.BN(amount), Buffer.from(sig), relayer.publicKey, new anchor.BN(attestationExpiry))
-      .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda2, tokenProgram: TOKEN_PROGRAM_ID })
+      .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda2, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
       .signers([relayer])
       .rpc();
 
@@ -276,10 +286,44 @@ describe("payfi", () => {
     try {
       await program.methods
         .withdrawByRelayer(Buffer.from(nullifier3), Buffer.from(commitment2), new anchor.BN(amount), Buffer.from(sigExpired), relayer.publicKey, new anchor.BN(expiredExpiry))
-        .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda3, tokenProgram: TOKEN_PROGRAM_ID })
+        .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda3, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
         .signers([relayer])
         .rpc();
       throw new Error("Expired attestation unexpectedly succeeded");
+    } catch (err: any) {
+      // expected
+    }
+
+    // Attempt second valid withdraw to trigger rate limit (should fail)
+    const nullifier4 = new Uint8Array(32);
+    nullifier4[0] = 13;
+    const prefix4 = Number(Buffer.from(nullifier4.slice(0, 8)).readBigUInt64LE(0));
+    const chunkIndex4 = Math.floor(prefix4 / 256);
+    const chunkIndexBuf4 = Buffer.alloc(8);
+    chunkIndexBuf4.writeBigUInt64LE(BigInt(chunkIndex4), 0);
+    const [chunkPda4] = await PublicKey.findProgramAddress([
+      Buffer.from("nullifier_chunk"),
+      chunkIndexBuf4,
+    ], program.programId);
+
+    let existing4 = await provider.connection.getAccountInfo(chunkPda4);
+    if (!existing4) {
+      await program.methods
+        .initNullifierChunk(new anchor.BN(chunkIndex4))
+        .accounts({ chunk: chunkPda4, manager: nullsManagerPda, payer: payerPubkey, systemProgram: SystemProgram.programId })
+        .rpc();
+    }
+
+    const message2 = Buffer.concat([Buffer.from(nullifier4), Buffer.from(commitment2), recipient2.publicKey.toBuffer(), amountBuf, expiryBuf]);
+    const sig2 = nacl.sign.detached(new Uint8Array(message2), relayer.secretKey);
+
+    try {
+      await program.methods
+        .withdrawByRelayer(Buffer.from(nullifier4), Buffer.from(commitment2), new anchor.BN(amount), Buffer.from(sig2), relayer.publicKey, new anchor.BN(attestationExpiry))
+        .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda4, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
+        .signers([relayer])
+        .rpc();
+      throw new Error("Second relayer withdraw unexpectedly succeeded (should be rate limited)");
     } catch (err: any) {
       // expected
     }

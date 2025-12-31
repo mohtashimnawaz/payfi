@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, TokenAccount, Transfer, Token};
 use anchor_lang::solana_program::{instruction::Instruction, program::invoke};
+use solana_program::ed25519_instruction::new_ed25519_instruction;
+use anchor_lang::solana_program::sysvar::clock::Clock;
 
 declare_id!("HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f");
 
@@ -9,6 +11,7 @@ pub const TREE_STATE_SEED: &[u8] = b"tree_state";
 pub const NULLIFIER_SET_SEED: &[u8] = b"nullifier_set";
 pub const NULLIFIER_CHUNK_SEED: &[u8] = b"nullifier_chunk";
 pub const ADMIN_SEED: &[u8] = b"admin";
+pub const RELAYER_STATE_SEED: &[u8] = b"relayer_state";
 
 #[program]
 pub mod payfi {
@@ -79,6 +82,16 @@ pub mod payfi {
         let admin = &mut ctx.accounts.admin;
         require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
         admin.relayers.retain(|a| a != &addr);
+        Ok(())
+    }
+
+    pub fn init_relayer_state(ctx: Context<InitRelayerState>, relayer: Pubkey, limit: u64, window_seconds: u64) -> Result<()> {
+        let state = &mut ctx.accounts.relayer_state;
+        state.window_start = 0u64;
+        state.count = 0u64;
+        state.limit = limit;
+        state.window_seconds = window_seconds;
+        state.bump = *ctx.bumps.get("relayer_state").unwrap();
         Ok(())
     }
 
@@ -205,7 +218,7 @@ pub mod payfi {
 
     /// Withdraw executed by a trusted relayer who has validated the proof off-chain.
     /// Relayer must be in `admin.relayers` and must sign this tx.
-    pub fn withdraw_by_relayer(ctx: Context<WithdrawByRelayer>, nullifier: [u8;32], root: [u8;32], amount: u64) -> Result<()> {
+    pub fn withdraw_by_relayer(ctx: Context<WithdrawByRelayer>, nullifier: [u8;32], root: [u8;32], amount: u64, attestation_sig: Vec<u8>, attestation_pubkey: Pubkey, attestation_expiry: u64) -> Result<()> {
         let admin = &mut ctx.accounts.admin;
         // pause check
         require!(!admin.paused, ErrorCode::ContractPaused);
@@ -218,6 +231,38 @@ pub mod payfi {
 
         // Verify root
         require!(ctx.accounts.tree_state.root == root, ErrorCode::RootMismatch);
+
+        // attestation expiry
+        let clock = Clock::get()?;
+        require!((attestation_expiry as i64) >= clock.unix_timestamp, ErrorCode::AttestationExpired);
+
+        // attestation pubkey must be relayer
+        require!(attestation_pubkey == ctx.accounts.relayer.key(), ErrorCode::Unauthorized);
+
+        // build attestation message: nullifier || root || recipient_pubkey || amount || expiry
+        let mut message: Vec<u8> = Vec::new();
+        message.extend_from_slice(&nullifier);
+        message.extend_from_slice(&root);
+        message.extend_from_slice(&ctx.accounts.recipient_token_account.owner.to_bytes());
+        message.extend_from_slice(&amount.to_le_bytes());
+        message.extend_from_slice(&attestation_expiry.to_le_bytes());
+
+        // verify ed25519 signature via syscall
+        require!(attestation_sig.len() == 64, ErrorCode::InvalidAttestation);
+        require!(attestation_pubkey.to_bytes().len() == 32, ErrorCode::InvalidAttestation);
+        let ix = new_ed25519_instruction(&attestation_sig, &attestation_pubkey.to_bytes(), &message);
+        invoke(&ix, &[])?;
+
+        // rate limiting via relayer state
+        let relayer_state = &mut ctx.accounts.relayer_state;
+        let now = clock.unix_timestamp as u64;
+        if now >= relayer_state.window_start + relayer_state.window_seconds {
+            // reset window
+            relayer_state.window_start = now - (now % relayer_state.window_seconds);
+            relayer_state.count = 0u64;
+        }
+        require!(relayer_state.count < relayer_state.limit, ErrorCode::RelayerRateLimited);
+        relayer_state.count = relayer_state.count.checked_add(1).unwrap();
 
         // Nullifier chunk check and atomic mark
         let chunk = &mut ctx.accounts.nullifier_chunk;
@@ -397,6 +442,9 @@ pub struct WithdrawByRelayer<'info> {
     #[account(mut)]
     pub nullifier_chunk: Account<'info, NullifierChunk>,
 
+    #[account(mut, seeds = [RELAYER_STATE_SEED, relayer.key().as_ref()], bump = relayer_state.bump)]
+    pub relayer_state: Account<'info, RelayerState>,
+
     pub token_program: Program<'info, Token>,
 }
 
@@ -423,6 +471,15 @@ pub struct NullifierSet {
 pub struct NullifierManager {
     pub count: u64,
     pub max_chunks: u64,
+    pub bump: u8,
+}
+
+#[account]
+pub struct RelayerState {
+    pub window_start: u64,
+    pub count: u64,
+    pub limit: u64,
+    pub window_seconds: u64,
     pub bump: u8,
 }
 
@@ -469,6 +526,12 @@ pub enum ErrorCode {
     InvalidProof,
     #[msg("Contract is paused")]
     ContractPaused,
+    #[msg("Attestation expired")]
+    AttestationExpired,
+    #[msg("Invalid attestation or signature")]
+    InvalidAttestation,
+    #[msg("Relayer rate limited")]
+    RelayerRateLimited,
     #[msg("Nullifier chunk limit reached")]
     ChunkLimitReached,
 }

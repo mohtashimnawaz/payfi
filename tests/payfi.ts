@@ -205,15 +205,41 @@ describe("payfi", () => {
     const relayer = Keypair.generate();
     await provider.connection.requestAirdrop(relayer.publicKey, 1e9);
 
+    // initialize relayer state for rate limiting
+    const relayerWindow = 60; // seconds
+    const relayerLimit = 10;
+
+    const relayerStateSeed = Buffer.from("relayer_state");
+    const [relayerStatePda] = await PublicKey.findProgramAddress([
+      relayerStateSeed,
+      relayer.publicKey.toBuffer(),
+    ], program.programId);
+
+    await program.methods
+      .initRelayerState(relayer.publicKey, new anchor.BN(relayerLimit), new anchor.BN(relayerWindow))
+      .accounts({ relayerState: relayerStatePda, payer: payerPubkey, systemProgram: SystemProgram.programId })
+      .rpc();
+
     await program.methods
       .addRelayer(relayer.publicKey)
       .accounts({ admin: adminPda, authority: payerPubkey })
       .rpc();
 
+    // Build attestation message and signature (nullifier || root || recipient_pubkey || amount || expiry)
+    const nacl = require('tweetnacl');
+    const attestationExpiry = Math.floor(Date.now() / 1000) + 60; // expiry in unix seconds
+    const amountBuf = Buffer.alloc(8);
+    amountBuf.writeBigUInt64LE(BigInt(amount), 0);
+    const expiryBuf = Buffer.alloc(8);
+    expiryBuf.writeBigUInt64LE(BigInt(attestationExpiry), 0);
+
+    const message = Buffer.concat([Buffer.from(nullifier2), Buffer.from(commitment2), recipient2.publicKey.toBuffer(), amountBuf, expiryBuf]);
+    const sig = nacl.sign.detached(new Uint8Array(message), relayer.secretKey);
+
     // Relayer performs withdraw (signer)
     await program.methods
-      .withdrawByRelayer(Buffer.from(nullifier2), Buffer.from(commitment2), new anchor.BN(amount))
-      .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda2, tokenProgram: TOKEN_PROGRAM_ID })
+      .withdrawByRelayer(Buffer.from(nullifier2), Buffer.from(commitment2), new anchor.BN(amount), Array.from(sig), relayer.publicKey, new anchor.BN(attestationExpiry))
+      .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda2, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
       .signers([relayer])
       .rpc();
 

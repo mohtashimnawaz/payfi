@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Wrapper to run the noir 'noirc' binary inside the official Docker image.
+# It mounts the current working dir into /workdir so commands see the repo files.
+# Usage: noirc <args...>
+
+# Resolve absolute path of current directory
+HOST_PWD=$(pwd -P)
+
+docker run --rm -v "$HOST_PWD":/workdir -w /workdir ghcr.io/noir-lang/noir:latest noirc "$@"

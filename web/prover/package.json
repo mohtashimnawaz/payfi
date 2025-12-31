@@ -13,10 +13,11 @@
     "browser:prove": "node scripts/browser_prove.js"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "next": "^13.4.0",
+    "@noir-lang/noir_wasm": "^0.1.0",
+    "big-integer": "^1.6.52",
     "circomlibjs": "^0.0.8",
-    "@noir-lang/noir_wasm": "^0.1.0"
+    "next": "^13.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

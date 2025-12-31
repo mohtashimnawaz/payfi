@@ -7,12 +7,28 @@ const path = require('path');
 (async function(){
   let poseidon;
   try {
-    // circomlibjs exports a poseidon function
+    // Try ESM dynamic import first
     const circomlib = await import('circomlibjs');
-    poseidon = circomlib.poseidon;
-  } catch (e) {
-    console.error('circomlibjs is required to generate vectors. Install with `npm i circomlibjs` in the project root or web/prover folder.');
-    process.exit(1);
+    poseidon = circomlib.poseidon || circomlib.default && circomlib.default.poseidon;
+  } catch (e1) {
+    try {
+      // Fall back to CommonJS require - rely on Node module resolution
+      const circomlib = require('circomlibjs');
+      poseidon = circomlib.poseidon || circomlib.default && circomlib.default.poseidon;
+    } catch (e2) {
+      try {
+        const path = require('path');
+        const fallback = path.resolve(__dirname, '..', '..', 'web', 'prover', 'node_modules', 'circomlibjs', 'index.js');
+        const circomlib = require(fallback);
+        poseidon = circomlib.poseidon || circomlib.default && circomlib.default.poseidon;
+      } catch (e3) {
+        console.error('circomlibjs is required to generate vectors. Install with `npm i circomlibjs` in the project root or web/prover folder.');
+        console.error('import error:', e1 && e1.message);
+        console.error('require error:', e2 && e2.message);
+        console.error('fallback error:', e3 && e3.message);
+        process.exit(1);
+      }
+    }
   }
 
   const leaf = BigInt(987654321);

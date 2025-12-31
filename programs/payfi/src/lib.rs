@@ -6,6 +6,7 @@ declare_id!("HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f");
 pub const VAULT_SEED: &[u8] = b"vault";
 pub const TREE_STATE_SEED: &[u8] = b"tree_state";
 pub const NULLIFIER_SET_SEED: &[u8] = b"nullifier_set";
+pub const NULLIFIER_CHUNK_SEED: &[u8] = b"nullifier_chunk";
 pub const ADMIN_SEED: &[u8] = b"admin";
 
 #[program]
@@ -32,6 +33,8 @@ pub mod payfi {
         let nulls = &mut ctx.accounts.nullifier_set;
         nulls.nullifiers = vec![];
         nulls.bump = nullifier_bump;
+
+        // No chunks created by default; use `init_nullifier_chunk` to create chunk accounts on-demand
 
         msg!("PayFi initialized by: {:?}", admin);
         Ok(())
@@ -65,6 +68,24 @@ pub mod payfi {
         let admin = &mut ctx.accounts.admin;
         require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
         admin.paused = paused;
+        Ok(())
+    }
+
+    /// Initialize a Nullifier chunk account for a specific chunk index.
+    pub fn init_nullifier_chunk(ctx: Context<InitNullifierChunk>, index: u64) -> Result<()> {
+        let chunk = &mut ctx.accounts.chunk;
+        chunk.index = index;
+        chunk.bitmap = [0u8; 32];
+        chunk.bump = *ctx.bumps.get("chunk").unwrap();
+        Ok(())
+    }
+
+    /// Update the on-chain merkle/compression root (Light Compression stub)
+    pub fn update_root(ctx: Context<UpdateRoot>, new_root: [u8;32]) -> Result<()> {
+        let admin = &ctx.accounts.admin;
+        require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
+        let tree = &mut ctx.accounts.tree_state;
+        tree.root = new_root;
         Ok(())
     }
 
@@ -106,20 +127,37 @@ pub mod payfi {
         // Verify root
         require!(ctx.accounts.tree_state.root == root, ErrorCode::RootMismatch);
 
-        // Proof verification stub (devnet): if stub mode enabled, proof must match magic
+        // Proof verification paths:
+        // mode 1: internal stub (proof must match magic)
+        // mode 2: CPI to verifier program
         if admin.verifier_mode == 1u8 {
             require!(admin.verifier_magic.len() > 0 && proof == admin.verifier_magic, ErrorCode::InvalidProof);
+        } else if admin.verifier_mode == 2u8 {
+            // CPI to verifier program
+            let ix = solana_program::instruction::Instruction::new_with_borsh(
+                ctx.accounts.verifier_program.key,
+                &(proof.clone(), admin.verifier_magic.clone()),
+                vec![],
+            );
+            solana_program::program::invoke(&ix, &[ctx.accounts.verifier_program.to_account_info()])?;
         } else {
             // when off, require non-empty proof (placeholder)
             require!(proof.len() > 0, ErrorCode::InvalidProof);
         }
 
-        // Ensure nullifier not used
-        let nullifier_set = &mut ctx.accounts.nullifier_set;
-        for n in nullifier_set.nullifiers.iter() {
-            require!(n != &nullifier, ErrorCode::NullifierAlreadyUsed);
-        }
-        nullifier_set.nullifiers.push(nullifier);
+        // Nullifier chunk check and atomic mark
+        let chunk = &mut ctx.accounts.nullifier_chunk;
+        // compute expected chunk index / bit index from nullifier prefix
+        let prefix_bytes: [u8;8] = nullifier[0..8].try_into().unwrap();
+        let prefix = u64::from_le_bytes(prefix_bytes);
+        let chunk_index = prefix / 256u64;
+        let bit_index = (prefix % 256u64) as usize;
+        require!(chunk.index == chunk_index, ErrorCode::NullifierAlreadyUsed); // chunk mismatch treated as used
+        let byte_idx = bit_index / 8;
+        let bit_mask = 1u8 << (bit_index % 8);
+        require!(chunk.bitmap[byte_idx] & bit_mask == 0, ErrorCode::NullifierAlreadyUsed);
+        // mark bit
+        chunk.bitmap[byte_idx] |= bit_mask;
 
         // Transfer tokens from vault to recipient token account
         let vault_seeds: &[&[u8]] = &[VAULT_SEED, &[ctx.accounts.vault.bump]];
@@ -205,6 +243,13 @@ pub struct Withdraw<'info> {
     #[account(mut, seeds = [TREE_STATE_SEED], bump = tree_state.bump)]
     pub tree_state: Account<'info, TreeState>,
 
+    /// Nullifier chunk corresponding to the nullifier being spent
+    #[account(mut, seeds = [NULLIFIER_CHUNK_SEED, chunk.index.to_le_bytes().as_ref()], bump = chunk.bump)]
+    pub nullifier_chunk: Account<'info, NullifierChunk>,
+
+    /// Verifier program (for CPI when verifier_mode == 2). Unchecked
+    pub verifier_program: UncheckedAccount<'info>,
+
     pub token_program: Program<'info, Token>,
 }
 
@@ -213,6 +258,26 @@ pub struct SetVerifierMode<'info> {
     #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump, has_one = authority)]
     pub admin: Account<'info, Admin>,
     pub authority: Signer<'info>,
+    /// When using mode=2 (CPI), pass the verifier program account
+    pub verifier_program: Option<UncheckedAccount<'info>>,
+}
+
+#[derive(Accounts)]
+pub struct InitNullifierChunk<'info> {
+    #[account(init, payer = payer, space = 8 + 8 + 32 + 1, seeds = [NULLIFIER_CHUNK_SEED, index.to_le_bytes()], bump)]
+    pub chunk: Account<'info, NullifierChunk>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateRoot<'info> {
+    #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump, has_one = authority)]
+    pub admin: Account<'info, Admin>,
+    pub authority: Signer<'info>,
+    #[account(mut, seeds = [TREE_STATE_SEED], bump = tree_state.bump)]
+    pub tree_state: Account<'info, TreeState>,
 }
 
 #[derive(Accounts)]
@@ -243,7 +308,15 @@ pub struct TreeState {
 
 #[account]
 pub struct NullifierSet {
+    // kept for backward compat / bookkeeping; nullifier chunks are preferred
     pub nullifiers: Vec<[u8;32]>,
+    pub bump: u8,
+}
+
+#[account]
+pub struct NullifierChunk {
+    pub index: u64,
+    pub bitmap: [u8;32], // 256 bits per chunk
     pub bump: u8,
 }
 

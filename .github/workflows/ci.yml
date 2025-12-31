@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: actions/setup-rust@v1
+        with:
+          rust-toolchain: stable
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+      - name: Build Anchor programs
+        run: |
+          anchor build
+      - name: Run tests
+        run: |
+          anchor test --skip-build

@@ -8,6 +8,10 @@ skip-lint = false
 [programs.localnet]
 payfi = "HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f"
 
+[programs.devnet]
+# Replace with actual deployed program id on devnet
+payfi = "HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f"
+
 [registry]
 url = "https://api.apr.dev"
 

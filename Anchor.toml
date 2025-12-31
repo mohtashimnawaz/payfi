@@ -9,14 +9,14 @@ skip-lint = false
 payfi = "HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f"
 
 [programs.devnet]
-# Replace with actual deployed program id on devnet
+
 payfi = "HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

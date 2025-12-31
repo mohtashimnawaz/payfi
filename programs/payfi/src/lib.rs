@@ -136,7 +136,7 @@ pub mod payfi {
             require!(admin.verifier_magic.len() > 0 && proof == admin.verifier_magic, ErrorCode::InvalidProof);
         } else if admin.verifier_mode == 2u8 {
             // CPI to verifier program
-            let verifier = ctx.accounts.verifier_program.as_ref().ok_or(ErrorCode::InvalidProof)?;
+            let verifier = &ctx.accounts.verifier_program;
             let ix = Instruction::new_with_borsh(
                 verifier.key(),
                 &(proof.clone(), admin.verifier_magic.clone()),
@@ -251,7 +251,7 @@ pub struct Withdraw<'info> {
     pub nullifier_chunk: Account<'info, NullifierChunk>,
 
     /// CHECK: Verifier program account (for CPI when verifier_mode == 2). Program id only, no account validation.
-    pub verifier_program: Option<UncheckedAccount<'info>>,
+    pub verifier_program: UncheckedAccount<'info>,
 
     pub token_program: Program<'info, Token>,
 }

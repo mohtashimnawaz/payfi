@@ -117,6 +117,7 @@ describe("payfi", () => {
           treeState: treePda,
           nullifierChunk: chunkPda,
           verifierProgram: program.programId,
+          verifier_program: program.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
@@ -128,7 +129,7 @@ describe("payfi", () => {
     // Set verifier mode to stub and magic to [1]
     await program.methods
       .setVerifierMode(1, Buffer.from([1]))
-      .accounts({ admin: adminPda, authority: payerPubkey })
+      .accounts({ admin: adminPda, authority: payerPubkey, verifierProgram: program.programId, verifier_program: program.programId })
       .rpc();
 
     // Withdraw with correct stub proof
@@ -144,6 +145,7 @@ describe("payfi", () => {
         treeState: treePda,
         nullifierChunk: chunkPda,
         verifierProgram: program.programId,
+        verifier_program: program.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();

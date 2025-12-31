@@ -150,9 +150,74 @@ describe("payfi", () => {
       .rpc();
 
     // Check recipient received tokens
-    const resp = await provider.connection.getTokenAccountBalance(recipientTokenAccount.address);
+    let resp = await provider.connection.getTokenAccountBalance(recipientTokenAccount.address);
     if (parseInt(resp.value.amount) !== amount) {
       throw new Error("Recipient did not receive tokens")
+    }
+
+    // --- Relayer demo: deposit again and withdraw via relayer ---
+    // Mint more tokens to payer and deposit
+    await mintTo(provider.connection, payerSigner, mint, payerTokenAccount.address, payerPubkey, amount);
+
+    const commitment2 = new Uint8Array(32);
+    commitment2[0] = 2;
+
+    await program.methods
+      .deposit(new anchor.BN(amount), Buffer.from(commitment2), null)
+      .accounts({
+        user: payerPubkey,
+        from: payerTokenAccount.address,
+        admin: adminPda,
+        vault: vaultPda,
+        vaultTokenAccount: vaultTokenAccount.address,
+        treeState: treePda,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    // Prepare a second recipient
+    const recipient2 = Keypair.generate();
+    const airdropSig2 = await provider.connection.requestAirdrop(recipient2.publicKey, 1e9);
+    await provider.connection.confirmTransaction(airdropSig2);
+    const recipientTokenAccount2 = await getOrCreateAssociatedTokenAccount(provider.connection, payerSigner, mint, recipient2.publicKey);
+
+    const nullifier2 = new Uint8Array(32);
+    nullifier2[0] = 9;
+
+    const prefix2 = Number(Buffer.from(nullifier2.slice(0, 8)).readBigUInt64LE(0));
+    const chunkIndex2 = Math.floor(prefix2 / 256);
+    const chunkIndexBuf2 = Buffer.alloc(8);
+    chunkIndexBuf2.writeBigUInt64LE(BigInt(chunkIndex2), 0);
+    const [chunkPda2] = await PublicKey.findProgramAddress([
+      Buffer.from("nullifier_chunk"),
+      chunkIndexBuf2,
+    ], program.programId);
+
+    // init chunk2
+    await program.methods
+      .initNullifierChunk(new anchor.BN(chunkIndex2))
+      .accounts({ chunk: chunkPda2, manager: nullsManagerPda, payer: payerPubkey, systemProgram: SystemProgram.programId })
+      .rpc();
+
+    // Add relayer and execute relayer withdraw
+    const relayer = Keypair.generate();
+    await provider.connection.requestAirdrop(relayer.publicKey, 1e9);
+
+    await program.methods
+      .addRelayer(relayer.publicKey)
+      .accounts({ admin: adminPda, authority: payerPubkey })
+      .rpc();
+
+    // Relayer performs withdraw (signer)
+    await program.methods
+      .withdrawByRelayer(Buffer.from(nullifier2), Buffer.from(commitment2), new anchor.BN(amount))
+      .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda2, tokenProgram: TOKEN_PROGRAM_ID })
+      .signers([relayer])
+      .rpc();
+
+    resp = await provider.connection.getTokenAccountBalance(recipientTokenAccount2.address);
+    if (parseInt(resp.value.amount) !== amount) {
+      throw new Error("Recipient2 did not receive tokens via relayer")
     }
   });
 });

@@ -367,6 +367,39 @@ pub struct SetPause<'info> {
     pub authority: Signer<'info>,
 }
 
+#[derive(Accounts)]
+pub struct ModifyRelayer<'info> {
+    #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump, has_one = authority)]
+    pub admin: Account<'info, Admin>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct WithdrawByRelayer<'info> {
+    pub relayer: Signer<'info>,
+
+    #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump)]
+    pub admin: Account<'info, Admin>,
+
+    /// CHECK: vault PDA
+    #[account(mut, seeds = [VAULT_SEED], bump = vault.bump)]
+    pub vault: Account<'info, Vault>,
+
+    #[account(mut, address = vault.token_account)]
+    pub vault_token_account: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub recipient_token_account: Account<'info, TokenAccount>,
+
+    #[account(mut, seeds = [TREE_STATE_SEED], bump = tree_state.bump)]
+    pub tree_state: Account<'info, TreeState>,
+
+    #[account(mut)]
+    pub nullifier_chunk: Account<'info, NullifierChunk>,
+
+    pub token_program: Program<'info, Token>,
+}
+
 #[account]
 pub struct Vault {
     pub token_account: Pubkey,

@@ -87,6 +87,22 @@ describe("payfi", () => {
     const nullifier = new Uint8Array(32);
     nullifier[0] = 7;
 
+    // compute chunk index from nullifier prefix
+    const prefix = Number(Buffer.from(nullifier.slice(0, 8)).readBigUInt64LE(0));
+    const chunkIndex = Math.floor(prefix / 256);
+    const chunkIndexBuf = Buffer.alloc(8);
+    chunkIndexBuf.writeBigUInt64LE(BigInt(chunkIndex), 0);
+    const [chunkPda] = await PublicKey.findProgramAddress([
+      Buffer.from("nullifier_chunk"),
+      chunkIndexBuf,
+    ], program.programId);
+
+    // init chunk
+    await program.methods
+      .initNullifierChunk(new anchor.BN(chunkIndex))
+      .accounts({ chunk: chunkPda, payer: payerPubkey, systemProgram: SystemProgram.programId })
+      .rpc();
+
     // Attempt withdraw with invalid proof (should fail)
     try {
       await program.methods
@@ -99,6 +115,8 @@ describe("payfi", () => {
           vaultTokenAccount: vaultTokenAccount.address,
           recipientTokenAccount: recipientTokenAccount.address,
           treeState: treePda,
+          nullifierChunk: chunkPda,
+          verifierProgram: program.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
@@ -124,6 +142,8 @@ describe("payfi", () => {
         vaultTokenAccount: vaultTokenAccount.address,
         recipientTokenAccount: recipientTokenAccount.address,
         treeState: treePda,
+        nullifierChunk: chunkPda,
+        verifierProgram: program.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();

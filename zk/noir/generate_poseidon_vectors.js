@@ -34,6 +34,12 @@ const path = require('path');
     secret: Number(secret.toString())
   };
 
+  // Also write a small unit test input that asserts poseidon([a,b]) == expected
+  const unitExpected = Number(poseidon([BigInt(12345), BigInt(67890)]).toString());
+  const unitInput = { a: 12345, b: 67890, expected: unitExpected };
+  fs.writeFileSync(path.join(__dirname,'input.poseidon.unit.json'), JSON.stringify(unitInput, null, 2));
+  console.log('Wrote poseidon unit test input to', path.join(__dirname,'input.poseidon.unit.json'));
+
   const outPath = path.join(__dirname,'input.poseidon.example.json');
   fs.writeFileSync(outPath, JSON.stringify(out, null, 2));
   console.log('Wrote test vectors to', outPath);

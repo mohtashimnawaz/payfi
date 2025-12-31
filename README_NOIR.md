@@ -10,9 +10,9 @@ What I added now (scaffold):
 
 Next steps:
 1) Implement secure hash function (Poseidon/Pedersen) in Noir circuit for real commitments
-2) Build WASM & JS bindings integration - use official `noir_wasm`/`noir_js` bindings for browser and add a small Next.js page that demonstrates loading a proof and showing the proof size.
-3) Add E2E test: generate proof (WASM), serialize, and call `programs/verifier` CPI stub to accept and check format (proof format checking only for now).
-4) Add CI job to build noir wasm and run proof tests on PRs (test `tests/noir_proof.test.ts` will run `make build-poseidon && make prove-poseidon`)
+2) Build WASM & JS bindings integration - use official `@noir-lang/noir_wasm` bindings for browser and add a small Next.js page that demonstrates generating a proof client-side (secrets stay in the browser). Use `make export-wasm` to copy the compiled WASM into `web/prover/public`.
+3) Add E2E test: generate proof (WASM), serialize, and call `programs/verifier` CPI stub to accept and check format (proof format checking only for now). The test added is `tests/verifier_proof.test.ts`.
+4) Add CI job to build noir wasm and run proof tests on PRs (the new GitHub workflow `noir-ci.yml` will attempt to install `noirc` and run the poseidon build/prove steps).
 
 How you run the demo locally:
 - Install Noir toolchain (see https://noir-lang.org/docs)
@@ -23,4 +23,4 @@ If you'd like, next I will:
 - Implement the Noir circuit using Poseidon and test vectors (secure nullifier derivation), and
 - Add a Node/Browser prover integration using `noir_wasm` and an example page that produces a proof in the browser and posts it to a dev endpoint.
 
-Tell me which you'd like me to do next (implement Poseidon & integration or wire the verifier stub to accept proofs).
+Next actions I can take: integrate `@noir-lang/noir_wasm` in the browser page so proofs can be generated client-side, or wire a full CPI path from payfi -> verifier for end-to-end withdraw tests. Which do you want first?

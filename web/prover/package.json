@@ -8,7 +8,9 @@
     "start": "next start",
     "prove:run": "node scripts/run_proof.js",
     "show:proof": "node scripts/fetch_and_show_proof.js",
-    "generate-vectors": "node ../../zk/noir/generate_poseidon_vectors.js"
+    "generate-vectors": "node ../../zk/noir/generate_poseidon_vectors.js",
+    "copy-wasm": "node scripts/copy_wasm.js",
+    "browser:prove": "node scripts/browser_prove.js"
   },
   "dependencies": {
     "react": "^18.2.0",

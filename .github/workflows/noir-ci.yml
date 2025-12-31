@@ -1,0 +1,43 @@
+name: Noir CI
+
+on:
+  push:
+    paths:
+      - 'zk/noir/**'
+      - 'web/prover/**'
+  pull_request:
+    paths:
+      - 'zk/noir/**'
+      - 'web/prover/**'
+
+jobs:
+  noir-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust and Cargo
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install noir compiler (may take some minutes)
+        run: |
+          cargo install --locked --git https://github.com/noir-lang/noir noirc || true
+      - name: Generate vectors (install circomlibjs)
+        run: |
+          cd web/prover && npm ci && cd ../..
+          cd zk/noir && node ../web/prover/node_modules/circomlibjs/dist/index.js || true
+      - name: Build poseidon circuit
+        run: |
+          cd zk/noir && make build-poseidon
+      - name: Prove poseidon
+        run: |
+          cd zk/noir && make prove-poseidon
+      - name: Run Poseidon unit test prove
+        run: |
+          cd zk/noir && make test-poseidon

@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, TokenAccount, Transfer, Token};
 use anchor_lang::solana_program::{instruction::Instruction, program::invoke};
+// ComputeBudgetInstruction not available via re-export in some SDK versions; we'll build the instruction bytes manually.
 use std::str::FromStr;
 
 // ed25519 syscall is intentionally not invoked here; signature checks are performed by length and relayer identity
@@ -266,10 +267,11 @@ pub mod payfi {
         require!(attestation_sig.len() == 64, ErrorCode::InvalidAttestation);
         require!(attestation_pubkey.to_bytes().len() == 32, ErrorCode::InvalidAttestation);
 
-        // NOTE: For now we validate attestation by ensuring correct lengths and that the attestation
-        // pubkey matches the relayer (trusted relayer). Implement ed25519 syscall verification
-        // in a follow-up change for production deployments.
-        // The attestation_sig must be 64 bytes (checked above).
+        // Optionally request more compute units (no-op unless compiled with `compute_budget` feature)
+        request_compute_units(200_000)?;
+
+        // verify ed25519 signature via runtime syscall (manual instruction builder)
+        verify_ed25519(&attestation_sig, &attestation_pubkey, &message)?;
 
 
 
@@ -341,6 +343,30 @@ fn verify_ed25519(sig: &[u8], pubkey: &Pubkey, message: &[u8]) -> Result<()> {
     let ix = Instruction::new_with_bytes(ed_prog, &data, vec![]);
     let res = invoke(&ix, &[]);
     if res.is_err() { return Err(ErrorCode::InvalidAttestation.into()); }
+    Ok(())
+}
+
+// Compute budget helper (feature-flagged): when compiled with `compute_budget`, this will
+// invoke the built-in ComputeBudget program to request additional compute units before
+// running expensive operations like ed25519 verification.
+#[cfg(feature = "compute_budget")]
+fn request_compute_units(units: u32) -> Result<()> {
+    // Manual builder for the ComputeBudget program RequestUnits instruction.
+    // Layout: u8 enum variant (0 = RequestUnits) + u32 units + u32 additional_fee
+    let program_id = Pubkey::from_str("ComputeBudget111111111111111111111111111111").map_err(|_| ErrorCode::ComputeBudgetRequestFailed)?;
+    let mut data: Vec<u8> = Vec::with_capacity(1 + 4 + 4);
+    data.push(0u8); // RequestUnits variant
+    data.extend_from_slice(&units.to_le_bytes());
+    data.extend_from_slice(&0u32.to_le_bytes()); // additional fee
+    let ix = Instruction::new_with_bytes(program_id, &data, vec![]);
+    let res = invoke(&ix, &[]);
+    if res.is_err() { return Err(ErrorCode::ComputeBudgetRequestFailed.into()); }
+    Ok(())
+}
+
+#[cfg(not(feature = "compute_budget"))]
+fn request_compute_units(_units: u32) -> Result<()> {
+    // no-op when feature not enabled
     Ok(())
 }
 
@@ -582,6 +608,8 @@ pub enum ErrorCode {
     InvalidAttestation,
     #[msg("Relayer rate limited")]
     RelayerRateLimited,
+    #[msg("Compute budget request failed")]
+    ComputeBudgetRequestFailed,
     #[msg("Nullifier chunk limit reached")]
     ChunkLimitReached,
 }

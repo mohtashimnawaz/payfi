@@ -10,6 +10,7 @@ name = "verifier"
 [features]
 default = []
 idl-build = ["anchor-lang/idl-build"]
+compute_budget = []
 
 [dependencies]
 anchor-lang = "0.32.1"

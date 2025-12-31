@@ -10,6 +10,7 @@ name = "payfi"
 
 [features]
 default = []
+compute_budget = []
 cpi = ["no-entrypoint"]
 no-entrypoint = []
 no-idl = []

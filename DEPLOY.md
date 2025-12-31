@@ -36,5 +36,5 @@ This document covers steps to deploy `payfi` to Solana Devnet for testing.
 - Add monitoring and an emergency `pause` procedure.
 
 ## Notes
-- If a transaction fails due to compute limits, consider adding a ComputeBudget instruction before the high-cost instruction or splitting workloads.
+- If a transaction fails due to compute limits, consider adding a ComputeBudget instruction before the high-cost instruction or splitting workloads. To enable our built-in helper at build time, build with the Cargo feature `compute_budget` and deploy with the same feature: `anchor build -- --features compute_budget` and `anchor deploy -- --features compute_budget`.
 - Use `anchor logs --provider.cluster devnet` to inspect program logs and debug.

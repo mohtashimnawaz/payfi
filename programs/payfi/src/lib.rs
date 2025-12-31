@@ -12,21 +12,23 @@ pub const ADMIN_SEED: &[u8] = b"admin";
 pub mod payfi {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, admin: Pubkey, vault_token_account: Pubkey) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, admin: Pubkey, vault_token_account: Pubkey, vault_bump: u8, tree_bump: u8, nullifier_bump: u8, admin_bump: u8) -> Result<()> {
         let admin_account = &mut ctx.accounts.admin;
         admin_account.authority = admin;
         admin_account.deny_list = vec![];
+        admin_account.bump = admin_bump;
 
         let vault_account = &mut ctx.accounts.vault;
         vault_account.token_account = vault_token_account;
+        vault_account.bump = vault_bump;
 
         let tree = &mut ctx.accounts.tree_state;
         tree.root = [0u8;32];
+        tree.bump = tree_bump;
 
         let nulls = &mut ctx.accounts.nullifier_set;
         nulls.nullifiers = vec![];
-
-        msg!("PayFi initialized by: {:?}", admin);
+        nulls.bump = nullifier_bump;
 
         msg!("PayFi initialized by: {:?}", admin);
         Ok(())

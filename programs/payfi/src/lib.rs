@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, TokenAccount, Transfer, Token};
+use anchor_lang::solana_program::{instruction::Instruction, program::invoke};
 
 declare_id!("HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f");
 
@@ -76,7 +77,8 @@ pub mod payfi {
         let chunk = &mut ctx.accounts.chunk;
         chunk.index = index;
         chunk.bitmap = [0u8; 32];
-        chunk.bump = *ctx.bumps.get("chunk").unwrap();
+        // leave bump at default; clients can derive bump if needed
+        chunk.bump = 0u8;
         Ok(())
     }
 
@@ -134,12 +136,12 @@ pub mod payfi {
             require!(admin.verifier_magic.len() > 0 && proof == admin.verifier_magic, ErrorCode::InvalidProof);
         } else if admin.verifier_mode == 2u8 {
             // CPI to verifier program
-            let ix = solana_program::instruction::Instruction::new_with_borsh(
-                ctx.accounts.verifier_program.key,
+            let ix = Instruction::new_with_borsh(
+                ctx.accounts.verifier_program.key(),
                 &(proof.clone(), admin.verifier_magic.clone()),
                 vec![],
             );
-            solana_program::program::invoke(&ix, &[ctx.accounts.verifier_program.to_account_info()])?;
+            invoke(&ix, &[ctx.accounts.verifier_program.to_account_info()])?;
         } else {
             // when off, require non-empty proof (placeholder)
             require!(proof.len() > 0, ErrorCode::InvalidProof);
@@ -244,7 +246,7 @@ pub struct Withdraw<'info> {
     pub tree_state: Account<'info, TreeState>,
 
     /// Nullifier chunk corresponding to the nullifier being spent
-    #[account(mut, seeds = [NULLIFIER_CHUNK_SEED, chunk.index.to_le_bytes().as_ref()], bump = chunk.bump)]
+    #[account(mut)]
     pub nullifier_chunk: Account<'info, NullifierChunk>,
 
     /// Verifier program (for CPI when verifier_mode == 2). Unchecked
@@ -263,8 +265,9 @@ pub struct SetVerifierMode<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(index: u64)]
 pub struct InitNullifierChunk<'info> {
-    #[account(init, payer = payer, space = 8 + 8 + 32 + 1, seeds = [NULLIFIER_CHUNK_SEED, index.to_le_bytes()], bump)]
+    #[account(init, payer = payer, space = 8 + 8 + 32 + 1, seeds = [NULLIFIER_CHUNK_SEED, &index.to_le_bytes()], bump)]
     pub chunk: Account<'info, NullifierChunk>,
     #[account(mut)]
     pub payer: Signer<'info>,

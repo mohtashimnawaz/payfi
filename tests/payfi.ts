@@ -22,8 +22,9 @@ describe("payfi", () => {
     const [treePda, treeBump] = await PublicKey.findProgramAddress([
       Buffer.from("tree_state")
     ], program.programId);
-    const [nullsPda, nullsBump] = await PublicKey.findProgramAddress([
-      Buffer.from("nullifier_set")
+    // NullifierSet removed; use manager and chunk accounts instead
+    const [nullsManagerPda, nullsManagerBump] = await PublicKey.findProgramAddress([
+      Buffer.from("nullifier_manager")
     ], program.programId);
     const [vaultPda, vaultBump] = await PublicKey.findProgramAddress([
       Buffer.from("vault")
@@ -40,11 +41,11 @@ describe("payfi", () => {
 
     // Initialize program state (provide vault token account pubkey and bump values)
     await program.methods
-      .initialize(payerPubkey, vaultTokenAccount.address, vaultBump, treeBump, nullsBump, adminBump)
+      .initialize(payerPubkey, vaultTokenAccount.address, vaultBump, treeBump, new anchor.BN(1000), adminBump)
       .accounts({
         admin: adminPda,
         treeState: treePda,
-        nullifierSet: nullsPda,
+        nullifierManager: nullsManagerPda,
         vault: vaultPda,
         payer: payerPubkey,
         systemProgram: SystemProgram.programId,
@@ -100,7 +101,7 @@ describe("payfi", () => {
     // init chunk
     await program.methods
       .initNullifierChunk(new anchor.BN(chunkIndex))
-      .accounts({ chunk: chunkPda, payer: payerPubkey, systemProgram: SystemProgram.programId })
+      .accounts({ chunk: chunkPda, manager: nullsManagerPda, payer: payerPubkey, systemProgram: SystemProgram.programId })
       .rpc();
 
     // Attempt withdraw with invalid proof (should fail)
@@ -109,7 +110,6 @@ describe("payfi", () => {
         .withdraw(Buffer.from([]), Buffer.from(nullifier), Buffer.from(commitment), new anchor.BN(amount))
         .accounts({
           authority: payerPubkey,
-          nullifierSet: nullsPda,
           admin: adminPda,
           vault: vaultPda,
           vaultTokenAccount: vaultTokenAccount.address,
@@ -137,7 +137,6 @@ describe("payfi", () => {
       .withdraw(Buffer.from([1]), Buffer.from(nullifier), Buffer.from(commitment), new anchor.BN(amount))
       .accounts({
         authority: payerPubkey,
-        nullifierSet: nullsPda,
         admin: adminPda,
         vault: vaultPda,
         vaultTokenAccount: vaultTokenAccount.address,

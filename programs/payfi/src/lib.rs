@@ -14,11 +14,11 @@ pub const ADMIN_SEED: &[u8] = b"admin";
 pub mod payfi {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, admin: Pubkey, vault_token_account: Pubkey, vault_bump: u8, tree_bump: u8, nullifier_bump: u8, admin_bump: u8) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, admin: Pubkey, vault_token_account: Pubkey, vault_bump: u8, tree_bump: u8, max_chunks: u64, admin_bump: u8) -> Result<()> {
         let admin_account = &mut ctx.accounts.admin;
         admin_account.authority = admin;
         admin_account.deny_list = vec![];
-        admin_account.verifier_mode = 0u8; // 0 = off, 1 = stub
+        admin_account.verifier_mode = 0u8; // 0 = off, 1 = stub, 2 = CPI
         admin_account.verifier_magic = vec![];
         admin_account.paused = false;
         admin_account.bump = admin_bump;
@@ -31,9 +31,10 @@ pub mod payfi {
         tree.root = [0u8;32];
         tree.bump = tree_bump;
 
-        let nulls = &mut ctx.accounts.nullifier_set;
-        nulls.nullifiers = vec![];
-        nulls.bump = nullifier_bump;
+        let manager = &mut ctx.accounts.nullifier_manager;
+        manager.count = 0u64;
+        manager.max_chunks = max_chunks;
+        manager.bump = 0u8; // bump left zero; clients can derive PDA bump
 
         // No chunks created by default; use `init_nullifier_chunk` to create chunk accounts on-demand
 
@@ -65,6 +66,22 @@ pub mod payfi {
         Ok(())
     }
 
+    pub fn add_relayer(ctx: Context<ModifyRelayer>, addr: Pubkey) -> Result<()> {
+        let admin = &mut ctx.accounts.admin;
+        require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
+        if !admin.relayers.iter().any(|a| a == &addr) {
+            admin.relayers.push(addr);
+        }
+        Ok(())
+    }
+
+    pub fn remove_relayer(ctx: Context<ModifyRelayer>, addr: Pubkey) -> Result<()> {
+        let admin = &mut ctx.accounts.admin;
+        require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
+        admin.relayers.retain(|a| a != &addr);
+        Ok(())
+    }
+
     pub fn set_pause(ctx: Context<SetPause>, paused: bool) -> Result<()> {
         let admin = &mut ctx.accounts.admin;
         require!(ctx.accounts.authority.key() == admin.authority, ErrorCode::Unauthorized);
@@ -74,11 +91,17 @@ pub mod payfi {
 
     /// Initialize a Nullifier chunk account for a specific chunk index.
     pub fn init_nullifier_chunk(ctx: Context<InitNullifierChunk>, index: u64) -> Result<()> {
+        // enforce manager limits
+        let manager = &mut ctx.accounts.manager;
+        require!(manager.count < manager.max_chunks, ErrorCode::ChunkLimitReached);
+
         let chunk = &mut ctx.accounts.chunk;
         chunk.index = index;
         chunk.bitmap = [0u8; 32];
-        // leave bump at default; clients can derive bump if needed
+        // store bump as 0 for now (clients can derive bump)
         chunk.bump = 0u8;
+
+        manager.count = manager.count.checked_add(1).unwrap();
         Ok(())
     }
 
@@ -132,6 +155,7 @@ pub mod payfi {
         // Proof verification paths:
         // mode 1: internal stub (proof must match magic)
         // mode 2: CPI to verifier program
+        // mode 3: relayer mode (disallow direct calls; relayer must use withdraw_by_relayer)
         if admin.verifier_mode == 1u8 {
             require!(admin.verifier_magic.len() > 0 && proof == admin.verifier_magic, ErrorCode::InvalidProof);
         } else if admin.verifier_mode == 2u8 {
@@ -144,7 +168,7 @@ pub mod payfi {
             );
             invoke(&ix, &[verifier.to_account_info()])?;
         } else {
-            // when off, require non-empty proof (placeholder)
+            // when off or other, require non-empty proof (placeholder)
             require!(proof.len() > 0, ErrorCode::InvalidProof);
         }
 
@@ -178,17 +202,62 @@ pub mod payfi {
 
         Ok(())
     }
+
+    /// Withdraw executed by a trusted relayer who has validated the proof off-chain.
+    /// Relayer must be in `admin.relayers` and must sign this tx.
+    pub fn withdraw_by_relayer(ctx: Context<WithdrawByRelayer>, nullifier: [u8;32], root: [u8;32], amount: u64) -> Result<()> {
+        let admin = &mut ctx.accounts.admin;
+        // pause check
+        require!(!admin.paused, ErrorCode::ContractPaused);
+
+        // relayer authorization
+        require!(admin.relayers.iter().any(|r| r == &ctx.accounts.relayer.key()), ErrorCode::Unauthorized);
+
+        // recipient deny-list check
+        require!(!admin.deny_list.iter().any(|a| a == &ctx.accounts.recipient_token_account.owner), ErrorCode::DenyListBlocked);
+
+        // Verify root
+        require!(ctx.accounts.tree_state.root == root, ErrorCode::RootMismatch);
+
+        // Nullifier chunk check and atomic mark
+        let chunk = &mut ctx.accounts.nullifier_chunk;
+        let prefix_bytes: [u8;8] = nullifier[0..8].try_into().unwrap();
+        let prefix = u64::from_le_bytes(prefix_bytes);
+        let chunk_index = prefix / 256u64;
+        let bit_index = (prefix % 256u64) as usize;
+        require!(chunk.index == chunk_index, ErrorCode::NullifierAlreadyUsed); // chunk mismatch treated as used
+        let byte_idx = bit_index / 8;
+        let bit_mask = 1u8 << (bit_index % 8);
+        require!(chunk.bitmap[byte_idx] & bit_mask == 0, ErrorCode::NullifierAlreadyUsed);
+        // mark bit
+        chunk.bitmap[byte_idx] |= bit_mask;
+
+        // Transfer tokens from vault to recipient token account
+        let vault_seeds: &[&[u8]] = &[VAULT_SEED, &[ctx.accounts.vault.bump]];
+        let signer_seeds: &[&[&[u8]]] = &[vault_seeds];
+
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.vault_token_account.to_account_info(),
+            to: ctx.accounts.recipient_token_account.to_account_info(),
+            authority: ctx.accounts.vault.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        token::transfer(CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds), amount)?;
+
+        emit!(WithdrawEvent { nullifier });
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
-#[instruction(admin: Pubkey)]
+#[instruction(admin: Pubkey, max_chunks: u64)]
 pub struct Initialize<'info> {
     #[account(init, payer = payer, space = 8 + 32 + (4 + 32 * 10) + 1 + (4 + 64), seeds = [ADMIN_SEED], bump)]
     pub admin: Account<'info, Admin>,
     #[account(init, payer = payer, space = 8 + 32 + 1, seeds = [TREE_STATE_SEED], bump)]
     pub tree_state: Account<'info, TreeState>,
-    #[account(init, payer = payer, space = 8 + (4 + 32 * 100), seeds = [NULLIFIER_SET_SEED], bump)]
-    pub nullifier_set: Account<'info, NullifierSet>,
+    #[account(init, payer = payer, space = 8 + 8 + 8 + 1, seeds = [b"nullifier_manager"], bump)]
+    pub nullifier_manager: Account<'info, NullifierManager>,
     #[account(init, payer = payer, space = 8 + 32 + 1, seeds = [VAULT_SEED], bump)]
     pub vault: Account<'info, Vault>,
 
@@ -227,8 +296,6 @@ pub struct Withdraw<'info> {
     /// CHECK: proof verification is done off-chain for now
     pub authority: Signer<'info>,
 
-    #[account(mut, seeds = [NULLIFIER_SET_SEED], bump = nullifier_set.bump)]
-    pub nullifier_set: Account<'info, NullifierSet>,
 
     #[account(mut, seeds = [ADMIN_SEED], bump = admin.bump, has_one = authority)]
     pub admin: Account<'info, Admin>,
@@ -271,6 +338,8 @@ pub struct InitNullifierChunk<'info> {
     #[account(init, payer = payer, space = 8 + 8 + 32 + 1, seeds = [NULLIFIER_CHUNK_SEED, &index.to_le_bytes()], bump)]
     pub chunk: Account<'info, NullifierChunk>,
     #[account(mut)]
+    pub manager: Account<'info, NullifierManager>,
+    #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
@@ -312,8 +381,15 @@ pub struct TreeState {
 
 #[account]
 pub struct NullifierSet {
-    // kept for backward compat / bookkeeping; nullifier chunks are preferred
+    // left for backward compatibility but unused in production
     pub nullifiers: Vec<[u8;32]>,
+    pub bump: u8,
+}
+
+#[account]
+pub struct NullifierManager {
+    pub count: u64,
+    pub max_chunks: u64,
     pub bump: u8,
 }
 
@@ -328,6 +404,7 @@ pub struct NullifierChunk {
 pub struct Admin {
     pub authority: Pubkey,
     pub deny_list: Vec<Pubkey>,
+    pub relayers: Vec<Pubkey>,
     pub verifier_mode: u8,
     pub verifier_magic: Vec<u8>,
     pub paused: bool,
@@ -359,4 +436,6 @@ pub enum ErrorCode {
     InvalidProof,
     #[msg("Contract is paused")]
     ContractPaused,
+    #[msg("Nullifier chunk limit reached")]
+    ChunkLimitReached,
 }

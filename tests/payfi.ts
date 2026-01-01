@@ -30,34 +30,71 @@ describe("payfi", () => {
       Buffer.from("vault")
     ], program.programId);
 
-    // Create a test mint and token accounts
-    const mint = await createMint(provider.connection, payerSigner, payerPubkey, null, 0);
-    const payerTokenAccount = await getOrCreateAssociatedTokenAccount(provider.connection, payerSigner, mint, payerPubkey);
-    const vaultTokenAccount = await getOrCreateAssociatedTokenAccount(provider.connection, payerSigner, mint, vaultPda, true);
-
-    // Mint some tokens to payer
+    // Idempotent initialization: if admin PDA exists, reuse on-chain vault token account and its mint
+    let adminInfo = await provider.connection.getAccountInfo(adminPda);
+    let mint: any;
+    let payerTokenAccount: any;
+    let vaultTokenAccountAddress: PublicKey;
     const amount = 100;
-    await mintTo(provider.connection, payerSigner, mint, payerTokenAccount.address, payerPubkey, amount);
 
-    // Initialize program state (provide vault token account pubkey and bump values)
-    await program.methods
-      .initialize(payerPubkey, vaultTokenAccount.address, vaultBump, treeBump, new anchor.BN(1000), adminBump)
-      .accounts({
-        admin: adminPda,
-        treeState: treePda,
-        nullifierManager: nullsManagerPda,
-        vault: vaultPda,
-        payer: payerPubkey,
-        systemProgram: SystemProgram.programId,
-        rent: SYSVAR_RENT_PUBKEY,
-      })
-      .rpc();
+    if (!adminInfo) {
+      // Create a test mint and token accounts when initializing fresh
+      mint = await createMint(provider.connection, payerSigner, payerPubkey, null, 0);
+      payerTokenAccount = await getOrCreateAssociatedTokenAccount(provider.connection, payerSigner, mint, payerPubkey);
+      const vaultTokenAccount = await getOrCreateAssociatedTokenAccount(provider.connection, payerSigner, mint, vaultPda, true);
+      vaultTokenAccountAddress = vaultTokenAccount.address;
+
+      // Mint some tokens to payer
+      await mintTo(provider.connection, payerSigner, mint, payerTokenAccount.address, payerPubkey, amount);
+
+      await program.methods
+        .initialize(payerPubkey, vaultTokenAccountAddress, vaultBump, treeBump, new anchor.BN(1000), adminBump)
+        .accounts({
+          admin: adminPda,
+          treeState: treePda,
+          nullifierManager: nullsManagerPda,
+          vault: vaultPda,
+          payer: payerPubkey,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
+        })
+        .rpc();
+    } else {
+      console.log("Admin PDA exists; skipping initialize (idempotent)");
+      // Use on-chain vault token account and its mint instead of creating a new mint
+      const vaultState: any = await program.account.vault.fetch(vaultPda);
+      vaultTokenAccountAddress = vaultState.tokenAccount ?? vaultState.token_account;
+      console.log("Using existing vault token account:", vaultTokenAccountAddress.toString());
+
+      // read the token account to find the mint
+      const parsed = await provider.connection.getParsedAccountInfo(vaultTokenAccountAddress);
+      const parsedInfo: any = (parsed.value && (parsed.value as any).data && (parsed.value as any).data.parsed) ? (parsed.value as any).data.parsed.info : null;
+      if (!parsedInfo) throw new Error('Unable to parse vault token account info to determine mint');
+      mint = new PublicKey(parsedInfo.mint);
+
+      // get or create payer token account for that mint
+      payerTokenAccount = await getOrCreateAssociatedTokenAccount(provider.connection, payerSigner, mint, payerPubkey);
+
+      // Ensure payer has tokens for testing on existing mint
+      const payerBal = await provider.connection.getTokenAccountBalance(payerTokenAccount.address).catch(()=>null);
+      if (!payerBal || parseInt(payerBal.value.amount) === 0) {
+        console.log('Payer has zero balance on existing mint; you may need to fund payer token account manually for devnet tests');
+      }
+    }
 
     // Prepare a fake commitment and encrypted note
     const commitment = new Uint8Array(32);
     commitment[0] = 1; // simple non-zero commitment for test
 
     // Deposit tokens into the vault
+    // Debug: show vault vs payer token account mints
+    const parsedVaultBefore = await provider.connection.getParsedAccountInfo(vaultTokenAccountAddress);
+    const vaultMint = parsedVaultBefore.value && (parsedVaultBefore.value as any).data && (parsedVaultBefore.value as any).data.parsed ? (parsedVaultBefore.value as any).data.parsed.info.mint : null;
+    const vaultOwner = parsedVaultBefore.value && (parsedVaultBefore.value as any).data && (parsedVaultBefore.value as any).data.parsed ? (parsedVaultBefore.value as any).data.parsed.info.owner : null;
+    const parsedPayerBefore = await provider.connection.getParsedAccountInfo(payerTokenAccount.address);
+    const payerMint = parsedPayerBefore.value && (parsedPayerBefore.value as any).data && (parsedPayerBefore.value as any).data.parsed ? (parsedPayerBefore.value as any).data.parsed.info.mint : null;
+    console.log("Vault mint:", vaultMint, "Vault owner:", vaultOwner, "expected vaultPDA:", vaultPda.toBase58(), "Payer mint:", payerMint);
+
     await program.methods
       .deposit(new anchor.BN(amount), Buffer.from(commitment), null)
       .accounts({
@@ -65,7 +102,7 @@ describe("payfi", () => {
         from: payerTokenAccount.address,
         admin: adminPda,
         vault: vaultPda,
-        vaultTokenAccount: vaultTokenAccount.address,
+        vaultTokenAccount: vaultTokenAccountAddress,
         treeState: treePda,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
@@ -115,7 +152,7 @@ describe("payfi", () => {
           authority: payerPubkey,
           admin: adminPda,
           vault: vaultPda,
-          vaultTokenAccount: vaultTokenAccount.address,
+          vaultTokenAccount: vaultTokenAccountAddress,
           recipientTokenAccount: recipientTokenAccount.address,
           treeState: treePda,
           nullifierChunk: chunkPda,
@@ -142,7 +179,7 @@ describe("payfi", () => {
         authority: payerPubkey,
         admin: adminPda,
         vault: vaultPda,
-        vaultTokenAccount: vaultTokenAccount.address,
+        vaultTokenAccount: vaultTokenAccountAddress,
         recipientTokenAccount: recipientTokenAccount.address,
         treeState: treePda,
         nullifierChunk: chunkPda,
@@ -172,7 +209,7 @@ describe("payfi", () => {
         from: payerTokenAccount.address,
         admin: adminPda,
         vault: vaultPda,
-        vaultTokenAccount: vaultTokenAccount.address,
+        vaultTokenAccount: vaultTokenAccountAddress,
         treeState: treePda,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
@@ -248,7 +285,7 @@ describe("payfi", () => {
     // Relayer performs withdraw (signer)
     await program.methods
       .withdrawByRelayer(Buffer.from(nullifier2), Buffer.from(commitment2), new anchor.BN(amount), Buffer.from(sig), relayer.publicKey, new anchor.BN(attestationExpiry))
-      .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda2, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
+      .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccountAddress, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda2, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
       .signers([relayer])
       .rpc();
 
@@ -286,7 +323,7 @@ describe("payfi", () => {
     try {
       await program.methods
         .withdrawByRelayer(Buffer.from(nullifier3), Buffer.from(commitment2), new anchor.BN(amount), Buffer.from(sigExpired), relayer.publicKey, new anchor.BN(expiredExpiry))
-        .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda3, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
+        .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccountAddress, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda3, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
         .signers([relayer])
         .rpc();
       throw new Error("Expired attestation unexpectedly succeeded");
@@ -320,7 +357,7 @@ describe("payfi", () => {
     try {
       await program.methods
         .withdrawByRelayer(Buffer.from(nullifier4), Buffer.from(commitment2), new anchor.BN(amount), Buffer.from(sig2), relayer.publicKey, new anchor.BN(attestationExpiry))
-        .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccount.address, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda4, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
+        .accounts({ relayer: relayer.publicKey, admin: adminPda, vault: vaultPda, vaultTokenAccount: vaultTokenAccountAddress, recipientTokenAccount: recipientTokenAccount2.address, treeState: treePda, nullifierChunk: chunkPda4, relayerState: relayerStatePda, tokenProgram: TOKEN_PROGRAM_ID })
         .signers([relayer])
         .rpc();
       throw new Error("Second relayer withdraw unexpectedly succeeded (should be rate limited)");

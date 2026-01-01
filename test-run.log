@@ -1,0 +1,24 @@
+Deploying cluster: https://api.devnet.solana.com
+Upgrade authority: /Users/mohtashimnawaz/.config/solana/id.json
+Deploying program "payfi"...
+Program path: /Users/mohtashimnawaz/Desktop/payfi/target/deploy/payfi.so...
+Program Id: 7SU3shMVxuzrQa614tkoQqicKPe1U9BFRJRzXoemFaeX
+
+Signature: mvgxQXAuuKpk1dEw2NpEVEneDBSBNgqYs8PzHAsTATeBDFBf3P4ej8G1Tx21SyjNQZonsXG4x6798QtDCL1okn1
+
+Deploying program "verifier"...
+Program path: /Users/mohtashimnawaz/Desktop/payfi/target/deploy/verifier.so...
+Program Id: GrY7XzE6ZhzztnJJatGJEkpuecdUyZSjEeLhc45pRptF
+
+Signature: 4RDTNEwUy2An8aFToK3C6jr8TXcdaqtaoAsae8jgcTK3d9sskVeXDaj6TV2mjTbztjAwar4fiDtHY74Yntnz5Wdv
+
+Deploy success
+
+Found a 'test' script in the Anchor.toml. Running it as a test suite!
+
+Running test suite: "/Users/mohtashimnawaz/Desktop/payfi/Anchor.toml"
+
+yarn run v1.22.22
+$ /Users/mohtashimnawaz/Desktop/payfi/node_modules/.bin/ts-mocha -p ./tsconfig.json -t 1000000 'tests/**/*.ts'
+RUN_DEVNET_SMOKE not set; skipping devnet smoke test.
+Done in 1.26s.

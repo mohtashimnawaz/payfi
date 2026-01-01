@@ -163,31 +163,48 @@ export default function ProverPage(){
       
       // Build the verify_proof instruction manually
       // Instruction format: [discriminator][proof_json_vec][public_inputs_vec]
-      const discriminator = Buffer.from([100, 98, 165, 253]); // Hash of "verify_proof"
+      const discriminator = new Uint8Array([100, 98, 165, 253]); // Hash of "verify_proof"
+      
+      // Helper function to create length-prefixed vec<u8>
+      const createVecBytes = (data: Uint8Array): Uint8Array => {
+        const len = new Uint8Array(4);
+        new DataView(len.buffer).setUint32(0, data.length, true);
+        return new Uint8Array([...len, ...data]);
+      };
       
       // Encode proof_json as vec<u8>
-      const proofBuf = Buffer.from(proofSerialized);
-      const proofVecLen = Buffer.alloc(4);
-      proofVecLen.writeUInt32LE(proofBuf.length, 0);
+      const proofBuf = new TextEncoder().encode(proofSerialized);
+      const encodedProof = createVecBytes(proofBuf);
       
-      // Encode public_inputs as vec<String> (simplified: vec<vec<u8>>)
-      const publicInputsBuf = publicInputs.map(pi => {
-        const piBuf = Buffer.from(pi);
-        const piVecLen = Buffer.alloc(4);
-        piVecLen.writeUInt32LE(piBuf.length, 0);
-        return Buffer.concat([piVecLen, piBuf]);
-      });
+      // Encode public_inputs count
+      const piCountBuf = new Uint8Array(4);
+      new DataView(piCountBuf.buffer).setUint32(0, publicInputs.length, true);
       
-      const publicInputsCount = Buffer.alloc(4);
-      publicInputsCount.writeUInt32LE(publicInputs.length, 0);
+      // Encode each public input as vec<u8>
+      const encodedInputs: Uint8Array[] = [];
+      for (const pi of publicInputs) {
+        const piBuf = new TextEncoder().encode(pi);
+        encodedInputs.push(createVecBytes(piBuf));
+      }
       
-      const instructionData = Buffer.concat([
-        discriminator,
-        proofVecLen,
-        proofBuf,
-        publicInputsCount,
-        ...publicInputsBuf
-      ]);
+      // Combine all instruction data
+      let totalLen = discriminator.length + encodedProof.length + piCountBuf.length;
+      for (const input of encodedInputs) {
+        totalLen += input.length;
+      }
+      
+      const instructionData = new Uint8Array(totalLen);
+      let offset = 0;
+      instructionData.set(discriminator, offset);
+      offset += discriminator.length;
+      instructionData.set(encodedProof, offset);
+      offset += encodedProof.length;
+      instructionData.set(piCountBuf, offset);
+      offset += piCountBuf.length;
+      for (const input of encodedInputs) {
+        instructionData.set(input, offset);
+        offset += input.length;
+      }
       
       const tx = new Transaction();
       
@@ -198,7 +215,7 @@ export default function ProverPage(){
           keys: [
             { pubkey: wallet, isSigner: false, isWritable: false } // audit_log
           ],
-          data: instructionData,
+          data: Buffer.from(instructionData),
         })
       );
 

@@ -1,5 +1,7 @@
 import '../styles/globals.css'
 import React from 'react'
+import dynamic from 'next/dynamic'
+const WalletProvider = dynamic(() => import('../src/components/WalletProvider'), { ssr: false });
 
 export const metadata = {
   title: 'PayFi Frontend',
@@ -11,9 +13,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <main style={{padding: 24, fontFamily: 'Inter, system-ui, sans-serif'}}>
-          {children}
+          {/* WalletProvider is a client component that renders the connect button */}
+          <WalletProvider>
+            {children}
+          </WalletProvider>
         </main>
       </body>
     </html>
-  )
+  );
 }

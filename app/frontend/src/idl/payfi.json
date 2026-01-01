@@ -1,0 +1,33 @@
+{
+  "address": "7SU3shMVxuzrQa614tkoQqicKPe1U9BFRJRzXoemFaeX",
+  "metadata": {
+    "name": "payfi",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "add_relayer",
+      "discriminator": [184,240,94,199,19,71,21,192],
+      "accounts": [{"name":"admin","writable":true,"pda":{"seeds":[{"kind":"const","value":[97,100,109,105,110]}]}} , {"name":"authority","signer":true,"relations":["admin"]}],
+      "args": [{"name":"addr","type":"pubkey"}]
+    },
+    {
+      "name":"add_to_denylist",
+      "discriminator":[194,213,51,109,157,0,252,157],
+      "accounts":[{"name":"admin","writable":true,"pda":{"seeds":[{"kind":"const","value":[97,100,109,105,110]}]}},{"name":"authority","signer":true,"relations":["admin"]}],
+      "args":[{"name":"addr","type":"pubkey"}]
+    },
+    {
+      "name":"deposit",
+      "discriminator":[242,35,198,137,82,225,242,182],
+      "accounts":[{"name":"user","writable":true,"signer":true},{"name":"from","writable":true},{"name":"admin","writable":true,"pda":{"seeds":[{"kind":"const","value":[97,100,109,105,110]}]}},{"name":"vault","writable":true},{"name":"vault_token_account","writable":true},{"name":"tree_state","writable":true},{"name":"token_program","address":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"}],
+      "args":[{"name":"amount","type":"u64"},{"name":"commitment","type":{"array":["u8",32]}},{"name":"encrypted_note","type":{"option":"bytes"}}]
+    }
+  ],
+  "accounts": [],
+  "types": [],
+  "events": [],
+  "errors": []
+}

@@ -14,6 +14,8 @@ compute_budget = []
 
 [dependencies]
 anchor-lang = "0.32.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 [profile.release]
 opt-level = "s"

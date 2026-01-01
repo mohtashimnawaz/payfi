@@ -1,11 +1,16 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 export default function Home() {
+  const router = useRouter()
+  
+  useEffect(() => {
+    router.replace('/prover')
+  }, [router])
+  
   return (
     <main style={{padding: 24}}>
-      <h1>payfi Noir Prover Demo</h1>
-      <p>This demo expects you to run the Noir build in <code>zk/noir</code> and then run the prover script.</p>
-      <p>See README in <code>zk/noir</code> for build steps.</p>
+      <h1>Redirecting to prover...</h1>
     </main>
   )
 }

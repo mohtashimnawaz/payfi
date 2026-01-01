@@ -2,11 +2,14 @@
 // Public: root, nullifier
 // Private: leaf, path_hashes, index, secret
 
-// NOTE: This circuit uses a Poseidon hash primitive for commitments and nullifiers.
-// In noir, use the standard library's Poseidon primitive when available (this file
-// assumes a `poseidon` function exists; update to match the installed noir stdlib).
-
-// poseidon(inputs: [Field]) -> Field  -- assumed available from stdlib
+// NOTE: This circuit uses a placeholder hash function currently.
+// Noir 1.0-beta.17 has Poseidon primitives but they are private/unexposed.
+// 
+// MIGRATION TODO: When Noir stdlib exposes Poseidon publicly (likely in next release):
+// Replace poseidon_hash2() with:
+//   std::hash::poseidon2([a, b])
+// or the appropriate public stdlib function.
+// See: https://github.com/noir-lang/noir/issues/ (search for Poseidon in stdlib)
 
 fn poseidon_hash2(a: Field, b: Field) -> Field {
     // Noir 1.0-beta.17 stdlib doesn't expose Poseidon publicly.

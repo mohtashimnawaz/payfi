@@ -9,17 +9,13 @@
 // poseidon(inputs: [Field]) -> Field  -- assumed available from stdlib
 
 fn poseidon_hash2(a: Field, b: Field) -> Field {
-    // Use the standard Poseidon primitive (stdlib) when available.
-    // Noir's stdlib exposes `poseidon` which takes an array of Fields.
-    // If your `noirc` version supports it, the following will compile:
-    // let arr = [a, b];
-    // poseidon(arr)
-
-    // Fallback for environments where Poseidon isn't available at build time:
-    a * 31 + b * 17 // NOTE: fallback - replace with the real Poseidon call in production
+    // Noir 1.0-beta.17 stdlib doesn't expose Poseidon publicly.
+    // TODO: Replace with true Poseidon when available in public stdlib.
+    // Temporary: simple field arithmetic (deterministic, not cryptographically secure).
+    a + b * 2
 }
 
-pub fn main(private leaf: Field, private path_hashes: Field, private index: Field, public root: Field, public nullifier: Field, private secret: Field) -> Field {
+fn main(leaf: Field, path_hashes: Field, index: Field, root: pub Field, nullifier: pub Field, secret: Field) -> pub Field {
     // Compute Merkle-style recombination (simple for demo): hash(hash(leaf, path_hashes), index)
     let h1 = poseidon_hash2(leaf, path_hashes);
     let computed_root = poseidon_hash2(h1, index);

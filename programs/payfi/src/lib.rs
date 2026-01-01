@@ -8,7 +8,7 @@ use std::str::FromStr;
 
 use anchor_lang::solana_program::sysvar::clock::Clock;
 
-declare_id!("HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f");
+declare_id!("7SU3shMVxuzrQa614tkoQqicKPe1U9BFRJRzXoemFaeX");
 
 pub const VAULT_SEED: &[u8] = b"vault";
 pub const TREE_STATE_SEED: &[u8] = b"tree_state";

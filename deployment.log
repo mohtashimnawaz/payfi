@@ -1,0 +1,6 @@
+Deploying cluster: https://api.devnet.solana.com
+Upgrade authority: /Users/mohtashimnawaz/.config/solana/id.json
+Deploying program "payfi"...
+Program path: /Users/mohtashimnawaz/Desktop/payfi/target/deploy/payfi.so...
+Error: Program HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f has been closed, use a new Program Id
+There was a problem deploying: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "" }.

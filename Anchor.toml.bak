@@ -6,11 +6,11 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-payfi = "7SU3shMVxuzrQa614tkoQqicKPe1U9BFRJRzXoemFaeX"
+payfi = "HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f"
 
 [programs.devnet]
 
-payfi = "7SU3shMVxuzrQa614tkoQqicKPe1U9BFRJRzXoemFaeX"
+payfi = "HotZhiJzwDN9BPVxbxWDDEYhZeRUGt2uLvj9uiwmav9f"
 
 [registry]
 url = "https://api.apr.dev"

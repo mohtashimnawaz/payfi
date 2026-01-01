@@ -1,0 +1,102 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  SOLANA_VERSION: 1.18.0
+  RUST_TOOLCHAIN: stable
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_TOOLCHAIN }}
+        targets: sbf-solana-solana
+    
+    - name: Install Solana CLI
+      run: |
+        sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_VERSION }}/install)"
+        echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Yarn
+      run: npm install -g yarn
+    
+    - name: Install Noir toolchain
+      run: |
+        curl -L https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash
+        echo "$HOME/.nargo/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+    
+    - name: Build Anchor programs
+      run: anchor build -p payfi
+    
+    - name: Build Noir circuit
+      run: |
+        cd zk/noir
+        nargo check
+        nargo compile
+    
+    - name: Execute Noir circuit (witness test)
+      run: |
+        cd zk/noir
+        nargo execute witness
+    
+    - name: Run Anchor tests (local validator)
+      run: |
+        # Start local validator in background
+        solana-test-validator --reset &
+        VALIDATOR_PID=$!
+        sleep 5
+        
+        # Run tests
+        anchor test --provider.cluster localnet -p payfi
+        TEST_EXIT=$?
+        
+        # Kill validator
+        kill $VALIDATOR_PID || true
+        
+        exit $TEST_EXIT
+    
+    - name: Lint
+      run: yarn lint
+      continue-on-error: true
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run Cargo audit
+      uses: rustsec/audit-check-action@v1
+      continue-on-error: true
+
+  docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+    
+    - name: Build docs
+      run: cargo doc --no-deps
+      continue-on-error: true

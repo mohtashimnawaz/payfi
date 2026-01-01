@@ -8,4 +8,4 @@ test-ledger
 Cargo.lock
 Nargo.lock
 
-docs
+docs/

@@ -2,14 +2,28 @@ use anchor_lang::prelude::*;
 
 declare_id!("H7vpWaLWY1dDc8odHnZ3p4SMRT89uDe6WRpaP5ewwWoh");
 
+// NOTE: This is a development verifier with basic proof checks.
+// 
+// PRODUCTION TODO: Implement actual Noir/Plonk verification using:
+// 1. Noir's verification key generation (vk from compiled circuit)
+// 2. Plonk proof verification algorithm (or equivalent for your ZK scheme)
+// 3. Consider using: https://github.com/noir-lang/noir/tree/master/packages/noir_js
+//    for on-chain verification, or integrate Barretenberg/Halo2 verifiers
+//
+// Current checks are for dev/testing only and provide NO security guarantees.
+
 #[program]
 pub mod verifier {
     use super::*;
 
     /// Verify a proof submitted from the browser prover.
     /// 
-    /// In production, this should perform actual Noir/Plonk verification.
-    /// For now, it checks proof format and content.
+    /// **DEVELOPMENT ONLY**: This currently performs basic format checks.
+    /// In production, this MUST implement actual Noir/Plonk verification.
+    ///
+    /// # Arguments
+    /// * `proof` - Serialized proof from browser (typically JSON-encoded)
+    /// * `magic` - Optional test mode: if provided, proof must exactly match magic bytes
     pub fn verify(_ctx: Context<Verify>, proof: Vec<u8>, magic: Option<Vec<u8>>) -> Result<()> {
         msg!("Verifier: received {} byte proof", proof.len());
 

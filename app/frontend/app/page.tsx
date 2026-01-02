@@ -8,7 +8,8 @@ export default function Home() {
       {/* Hero Section */}
       <div className="text-center mb-32 animate-reveal relative">
         {/* Background Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[680px] bg-gradient-to-tr from-indigo-200/12 via-purple-200/10 to-pink-200/10 rounded-full blur-[140px] -z-10" />
+        <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] bg-gradient-to-br from-indigo-300/10 to-pink-300/6 rounded-full blur-[60px] -z-10" />
         
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-transparent border border-[#e6e9ef] mb-10">
           <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
@@ -40,7 +41,7 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-6 gap-5 mb-32">
         {/* Main Feature */}
         <Link href="/deposit" className="md:col-span-4 group">
-          <div className="card h-full flex flex-col justify-between relative overflow-hidden">
+          <div className="card card--primary h-full flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px] -z-10 group-hover:bg-indigo-500/10 transition-colors duration-700" />
             <div>
               <div className="badge mb-8">Primary</div>

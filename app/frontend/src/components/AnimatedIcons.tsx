@@ -210,7 +210,7 @@ export function NetworkIcon({ size = 24, className = '', animate = true }: Anima
     >
       {[0, 120, 240].map((angle, idx) => (
         <motion.g key={angle}>
-          <circle
+          <motion.circle
             cx={12 + 7 * Math.cos((angle * Math.PI) / 180)}
             cy={12 + 7 * Math.sin((angle * Math.PI) / 180)}
             r="1.5"
@@ -226,7 +226,7 @@ export function NetworkIcon({ size = 24, className = '', animate = true }: Anima
           />
         </motion.g>
       ))}
-      <circle cx="12" cy="12" r="2" />
+      <motion.circle cx="12" cy="12" r="2" />
     </motion.svg>
   );
 }

@@ -25,10 +25,10 @@ export default function RelayerPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const steps = [
-    { id: 'register', label: 'Register', status: 'pending' as const, icon: LinkIcon },
-    { id: 'init', label: 'Initialize', status: 'pending' as const, icon: PlugIcon },
-    { id: 'verify', label: 'Verify', status: 'pending' as const, icon: NetworkIcon },
-    { id: 'complete', label: 'Complete', status: 'pending' as const, icon: PlugIcon },
+    { id: 'register', label: 'Register', status: 'pending' as const, icon: <LinkIcon size={20} className="text-white" animate={false} /> },
+    { id: 'init', label: 'Initialize', status: 'pending' as const, icon: <PlugIcon size={20} className="text-white" animate={false} /> },
+    { id: 'verify', label: 'Verify', status: 'pending' as const, icon: <NetworkIcon size={20} className="text-white" animate={false} /> },
+    { id: 'complete', label: 'Complete', status: 'pending' as const, icon: <PlugIcon size={20} className="text-white" animate={false} /> },
   ];
 
   async function handleAddRelayer() {
@@ -295,14 +295,14 @@ export default function RelayerPage() {
                     <span className="text-sm font-medium text-body">Withdrawal Limit</span>
                     <span className="text-xs text-indigo-400 font-semibold">{limit} tx/window</span>
                   </div>
-                  <ComparisonBar label1={`Limit: ${limit}`} value1={limit} label2="Used: 0" value2={0} height={6} />
+                  <ComparisonBar yourValue={limit} averageValue={0} label="Configured" maxValue={limit > 0 ? limit : 1} />
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-3">
                     <span className="text-sm font-medium text-body">Time Window</span>
                     <span className="text-xs text-purple-400 font-semibold">{windowSec}s</span>
                   </div>
-                  <ComparisonBar label1={`Window: ${windowSec}s`} value1={windowSec} label2="Elapsed: 0s" value2={0} height={6} />
+                  <ComparisonBar yourValue={windowSec} averageValue={0} label="Configured" maxValue={windowSec > 0 ? windowSec : 1} />
                 </div>
               </div>
             </div>

@@ -195,7 +195,7 @@ export default function WithdrawPage() {
                     <span className="text-sm font-medium text-muted">Withdrawal Progress</span>
                     <span className="text-xs text-muted">{progressPercent.toFixed(1)}%</span>
                   </div>
-                  <PercentageBar percentage={Math.min(progressPercent, 100)} height={8} />
+                  <PercentageBar percentage={Math.min(progressPercent, 100)} color="indigo" />
                 </div>
 
                 {/* Quick Select Buttons */}

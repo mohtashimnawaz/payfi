@@ -50,29 +50,30 @@ export default function WithdrawPage() {
   }
 
   return (
-    <div>
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold mb-3 gradient-text">Withdraw Funds</h1>
-        <p className="text-slate-400">Withdraw tokens with valid zero-knowledge proofs or relayer attestation.</p>
+    <div className="reveal">
+      <div className="mb-12">
+        <h1 className="text-4xl font-medium text-white mb-4 tracking-tight">Withdraw Funds</h1>
+        <p className="text-white/40 text-lg max-w-2xl">Withdraw tokens with valid zero-knowledge proofs or relayer attestation.</p>
       </div>
+      
       <BentoGrid>
         <div className="lg:col-span-2">
-          <Card title="Withdrawal Request">
-            <div className="space-y-5">
-              <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
-                <div className="text-sm text-slate-400 mb-1">Wallet Status</div>
-                <div className={`text-lg font-semibold ${connected ? 'text-green-400' : 'text-red-400'}`}>
-                  {connected ? '✓ Connected' : '✗ Not Connected'}
+          <Card title="Withdrawal Request" badge="Private">
+            <div className="space-y-6">
+              <div className="bg-white/[0.02] p-6 rounded-2xl border border-white/[0.05]">
+                <div className="text-xs uppercase tracking-widest text-white/30 mb-2 font-medium">Wallet Status</div>
+                <div className={`text-xl font-medium ${connected ? 'text-white' : 'text-white/20'}`}>
+                  {connected ? 'Connected' : 'Not Connected'}
                 </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Amount (tokens)</label>
+              <div className="space-y-2">
+                <label className="text-xs uppercase tracking-widest text-white/30 font-medium ml-1">Amount (tokens)</label>
                 <input 
                   type="number" 
                   value={amount} 
                   onChange={(e)=>setAmount(parseInt(e.target.value))} 
-                  className="w-full"
+                  className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/20 transition-colors"
                   placeholder="100"
                 />
               </div>
@@ -80,27 +81,31 @@ export default function WithdrawPage() {
               <button 
                 onClick={handleWithdraw} 
                 disabled={!connected}
-                className="btn-primary w-full py-3 font-semibold text-lg"
+                className="btn-primary w-full py-4 text-lg"
               >
-                🔓 Initiate Withdrawal
+                Initiate Withdrawal
               </button>
               
               {status && (
-                <div className={`p-4 rounded-lg border ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/20 border-red-500/50 text-red-300' : 'bg-purple-500/20 border-purple-500/50 text-purple-300'}`}>
-                  <p className="text-sm">{status}</p>
+                <div className={`p-4 rounded-xl border text-sm ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/5 border-red-500/10 text-red-400' : 'bg-white/5 border-white/10 text-white/60'}`}>
+                  {status}
                 </div>
               )}
             </div>
           </Card>
         </div>
-        <Card title="⚠️ Important">
-          <div className="space-y-3 text-slate-300">
-            <p className="text-sm">This withdrawal flow requires:</p>
-            <ul className="text-xs space-y-1 list-disc list-inside text-slate-400">
+
+        <Card title="Requirements" badge="Important">
+          <div className="space-y-4 text-white/40 text-sm leading-relaxed">
+            <p>This withdrawal flow requires:</p>
+            <ul className="space-y-2 list-disc list-inside">
               <li>Valid zero-knowledge proofs</li>
-              <li>Or relayer attestation</li>
-              <li>Frontend can't generate ZK proofs yet</li>
+              <li>Relayer attestation (if applicable)</li>
+              <li>Sufficient vault liquidity</li>
             </ul>
+            <p className="pt-4 border-t border-white/[0.05] text-xs italic">
+              Note: This is a placeholder UI for demonstration purposes.
+            </p>
           </div>
         </Card>
       </BentoGrid>

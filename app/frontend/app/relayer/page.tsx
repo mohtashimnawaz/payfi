@@ -15,96 +15,35 @@ export default function RelayerPage() {
   const [windowSec, setWindowSec] = useState<number>(60);
   const [relayerStateInfo, setRelayerStateInfo] = useState<any>(null);
 
-  // ... rest of handlers remain the same ...
-
-  return (
-    <div>
-      <div className="mb-10 animate-fadeInUp">
-        <h1 className="text-4xl font-bold mb-3 gradient-text">Relayer Management</h1>
-        <p className="text-slate-400">Register and manage relayers for transaction processing and attestation.</p>
-      </div>
-      <BentoGrid>
-        <Card title="Add Relayer">
-          <div className="space-y-5">
-            <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
-              <div className="text-sm text-slate-400 mb-1">Wallet Status</div>
-              <div className={`text-lg font-semibold ${connected ? 'text-green-400' : 'text-red-400'}`}>
-                {connected ? '✓ Connected' : '✗ Not Connected'}
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Relayer Address (Pubkey)</label>
-              <input 
-                type="text" 
-                value={relayerAddr} 
-                onChange={(e)=>setRelayerAddr(e.target.value)} 
-                className="w-full text-xs"
-                placeholder="Enter public key"
-              />
-            </div>
-            
-            <button 
-              onClick={handleAddRelayer} 
-              disabled={!connected || !relayerAddr}
-              className="btn-primary w-full py-2 font-semibold"
-            >
-              ✅ Add Relayer
-            </button>
-            
-            {status && (
-              <div className={`p-4 rounded-lg border ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/20 border-red-500/50 text-red-300' : 'bg-green-500/20 border-green-500/50 text-green-300'}`}>
-                <p className="text-sm">{status}</p>
-              </div>
-            )}
-          </div>
-        </Card>
-
-        <Card title="Initialize Relayer State">
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Withdrawal Limit</label>
-              <input 
-                type="number" 
-                value={limit} 
-                onChange={(e)=>setLimit(parseInt(e.target.value))} 
-                className="w-full"
-                placeholder="1"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Rate Limit Window (sec)</label>
-              <input 
-                type="number" 
-                value={windowSec} 
-                onChange={(e)=>setWindowSec(parseInt(e.target.value))} 
-                className="w-full"
-                placeholder="60"
-              />
-            </div>
-            
-            <button 
-              onClick={handleInitRelayerState} 
-              disabled={!connected}
-              className="btn-secondary w-full py-2 font-semibold"
-            >
-              🚀 Initialize State
-            </button>
-          </div>
-        </Card>
-
-        <Card title="📋 Info">
-          <div className="space-y-3 text-slate-300 text-sm">
-            <p><span className="text-purple-300 font-semibold">Relayers:</span> Entities that process withdrawals and attest transactions.</p>
-            <p><span className="text-purple-300 font-semibold">Rate Limiting:</span> Controls withdrawal frequency per relayer.</p>
-          </div>
-        </Card>
-      </BentoGrid>
-    </div>
-  );
+  async function handleAddRelayer() {
+    if (!publicKey || !wallet) return setStatus('Connect wallet');
+    try {
+      setStatus('Adding relayer...');
+      const connection = getConnection();
+      const provider = getAnchorProvider(connection, (wallet as any));
       const program = getProgram(provider);
+      const [adminPda] = await PublicKey.findProgramAddress([Buffer.from('admin')], program.programId);
+      const relayerPub = new PublicKey(relayerAddr);
 
+      await program.methods
+        .addRelayer(relayerPub)
+        .accounts({ admin: adminPda, payer: publicKey })
+        .rpc();
+
+      setStatus('Relayer added successfully');
+    } catch (err: any) {
+      setStatus('Failed to add relayer: ' + (err.message || String(err)));
+      console.error(err);
+    }
+  }
+
+  async function handleInitRelayerState() {
+    if (!publicKey || !wallet) return setStatus('Connect wallet');
+    try {
+      setStatus('Initializing relayer state...');
+      const connection = getConnection();
+      const provider = getAnchorProvider(connection, (wallet as any));
+      const program = getProgram(provider);
       const relayerPub = new PublicKey(relayerAddr);
       const [relayerStatePda] = await PublicKey.findProgramAddress([Buffer.from('relayer_state'), relayerPub.toBuffer()], program.programId);
 
@@ -139,75 +78,101 @@ export default function RelayerPage() {
   }
 
   return (
-    <div className="container px-4 py-6 mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-slate-900">Relayer Management</h1>
+    <div className="reveal">
+      <div className="mb-12">
+        <h1 className="text-4xl font-medium text-white mb-4 tracking-tight">Relayer Management</h1>
+        <p className="text-white/40 text-lg max-w-2xl">Register and manage relayers for transaction processing and attestation.</p>
+      </div>
+      
       <BentoGrid>
-        <Card title="Register Relayer">
-          <div className="flex flex-col gap-4">
-            <label className="text-sm font-medium text-slate-700">Relayer Public Key</label>
-            <input 
-              value={relayerAddr} 
-              onChange={(e)=>setRelayerAddr(e.target.value)} 
-              placeholder="Enter relayer pubkey" 
-              className="border border-slate-300 rounded px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            />
+        <Card title="Add Relayer" badge="Registry">
+          <div className="space-y-6">
+            <div className="bg-white/[0.02] p-6 rounded-2xl border border-white/[0.05]">
+              <div className="text-xs uppercase tracking-widest text-white/30 mb-2 font-medium">Wallet Status</div>
+              <div className={`text-xl font-medium ${connected ? 'text-white' : 'text-white/20'}`}>
+                {connected ? 'Connected' : 'Not Connected'}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-widest text-white/30 font-medium ml-1">Relayer Address (Pubkey)</label>
+              <input 
+                type="text" 
+                value={relayerAddr} 
+                onChange={(e)=>setRelayerAddr(e.target.value)} 
+                className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-white/20 transition-colors"
+                placeholder="Enter public key"
+              />
+            </div>
+            
             <button 
               onClick={handleAddRelayer} 
-              disabled={!connected}
-              className="bg-primary text-white font-semibold rounded px-4 py-2 disabled:opacity-50 hover:bg-accent transition-colors"
+              disabled={!connected || !relayerAddr}
+              className="btn-primary w-full py-3"
             >
-              Add Relayer (admin only)
+              Add Relayer
             </button>
-            {status && <div className="mt-4 p-3 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">{status}</div>}
+            
+            {status && (
+              <div className={`p-4 rounded-xl border text-sm ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/5 border-red-500/10 text-red-400' : 'bg-white/5 border-white/10 text-white/60'}`}>
+                {status}
+              </div>
+            )}
           </div>
         </Card>
 
-        <Card title="Init Relayer State">
-          <div className="flex flex-col gap-4">
-            <div>
-              <label className="text-sm font-medium text-slate-700">Transaction Limit</label>
+        <Card title="Initialize State" badge="Config">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-widest text-white/30 font-medium ml-1">Withdrawal Limit</label>
               <input 
                 type="number" 
                 value={limit} 
                 onChange={(e)=>setLimit(parseInt(e.target.value))} 
-                className="w-full border border-slate-300 rounded px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary mt-1 text-sm"
+                className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/20 transition-colors"
+                placeholder="1"
               />
             </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700">Window (seconds)</label>
+            
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-widest text-white/30 font-medium ml-1">Rate Limit Window (sec)</label>
               <input 
                 type="number" 
                 value={windowSec} 
                 onChange={(e)=>setWindowSec(parseInt(e.target.value))} 
-                className="w-full border border-slate-300 rounded px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary mt-1 text-sm"
+                className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/20 transition-colors"
+                placeholder="60"
               />
             </div>
+            
             <button 
               onClick={handleInitRelayerState} 
               disabled={!connected}
-              className="bg-primary text-white font-semibold rounded px-4 py-2 disabled:opacity-50 hover:bg-accent transition-colors"
+              className="btn-secondary w-full py-3"
             >
-              Initialize Relayer State
+              Initialize State
             </button>
           </div>
         </Card>
 
-        <Card title="Relayer State Viewer">
-          <div className="flex flex-col gap-4">
+        <Card title="Relayer State" badge="Viewer">
+          <div className="space-y-4">
             <button 
               onClick={fetchRelayerState} 
               disabled={!relayerAddr}
-              className="bg-slate-600 text-white font-semibold rounded px-4 py-2 disabled:opacity-50 hover:bg-slate-700 transition-colors"
+              className="btn-secondary w-full py-2 text-xs"
             >
-              Fetch Relayer State
+              Fetch State
             </button>
-            <div className="bg-slate-900 rounded p-4 text-slate-100 text-xs font-mono overflow-x-auto">
-              <pre className="whitespace-pre-wrap">{JSON.stringify(relayerStateInfo, null, 2)}</pre>
+            <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.05] overflow-x-auto max-h-48">
+              <pre className="text-[10px] font-mono text-white/40 whitespace-pre-wrap break-words">
+                {relayerStateInfo ? JSON.stringify(relayerStateInfo, null, 2) : 'No data loaded.'}
+              </pre>
             </div>
           </div>
         </Card>
-
       </BentoGrid>
     </div>
   );
 }
+

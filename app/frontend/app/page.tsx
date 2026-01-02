@@ -4,174 +4,99 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="w-full">
-      {/* Hero/Dashboard Section - Center Top */}
-      <div className="mb-16 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-indigo-500/5 to-transparent rounded-3xl blur-2xl -z-10" />
-        <div className="dashboard-card">
-          <div className="text-center max-w-2xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 gradient-text leading-tight">
-              Privacy-First Finance
-            </h1>
-            <p className="text-lg text-slate-300 leading-relaxed mb-8">
-              Secure token management with built-in privacy protocols. Deposit, withdraw, and manage your assets with confidence on Solana blockchain.
+    <div className="w-full max-w-[1000px] mx-auto">
+      {/* Hero Section */}
+      <div className="text-center mb-24 animate-reveal">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-[11px] font-medium uppercase tracking-widest text-white/60">Protocol Live on Devnet</span>
+        </div>
+        <h1 className="text-[64px] md:text-[80px] font-semibold tracking-[-0.04em] leading-[0.95] text-white mb-8 text-balance">
+          Privacy for the <br /> next billion.
+        </h1>
+        <p className="text-xl text-white/40 max-w-[600px] mx-auto leading-relaxed text-balance mb-12">
+          PayFi is a decentralized privacy protocol built on Solana. 
+          Secure your assets with zero-knowledge proofs.
+        </p>
+        <div className="flex items-center justify-center gap-4">
+          <Link href="/deposit" className="btn-primary">
+            Launch App
+          </Link>
+          <Link href="/debug" className="btn-secondary">
+            View State
+          </Link>
+        </div>
+      </div>
+
+      {/* Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-24">
+        {/* Main Feature */}
+        <Link href="/deposit" className="md:col-span-4 group">
+          <div className="card h-full flex flex-col justify-between">
+            <div>
+              <div className="badge mb-6">Primary</div>
+              <h2 className="text-3xl font-medium text-white mb-4">Private Deposits</h2>
+              <p className="text-white/40 leading-relaxed max-w-[300px]">
+                Shield your tokens in our secure vault using advanced ZK commitments.
+              </p>
+            </div>
+            <div className="mt-12 flex items-end justify-between">
+              <div className="text-[13px] font-medium text-white/20 group-hover:text-white transition-colors">
+                Start Shielding →
+              </div>
+              <div className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                <div className="w-8 h-8 border-2 border-white/20 rounded-full border-t-white animate-spin-slow" />
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* Secondary Feature */}
+        <Link href="/withdraw" className="md:col-span-2 group">
+          <div className="card h-full bg-white/[0.02] border-white/5">
+            <div className="badge mb-6">Secure</div>
+            <h2 className="text-2xl font-medium text-white mb-4">Withdraw</h2>
+            <p className="text-sm text-white/40 leading-relaxed">
+              Redeem your assets with cryptographic proofs.
             </p>
-            <div className="flex gap-4 justify-center">
-              <Link href="/deposit" className="btn-primary">
-                Get Started
-              </Link>
-              <a href="#features" className="btn-secondary">
-                Learn More
-              </a>
+            <div className="mt-12 text-[13px] font-medium text-white/20 group-hover:text-white transition-colors">
+              Redeem →
             </div>
           </div>
+        </Link>
 
-          {/* Dashboard Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-12 pt-8 border-t border-purple-500/20">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text mb-2">–</div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider">Total Deposits</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text mb-2">–</div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider">Active Relayers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-transparent bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text mb-2">–</div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider">TVL</div>
-            </div>
+        {/* Small Cards */}
+        <Link href="/admin" className="md:col-span-2 group">
+          <div className="card h-full py-6">
+            <h3 className="text-lg font-medium text-white mb-2">Admin</h3>
+            <p className="text-sm text-white/40">Protocol control.</p>
           </div>
+        </Link>
+
+        <Link href="/relayer" className="md:col-span-2 group">
+          <div className="card h-full py-6">
+            <h3 className="text-lg font-medium text-white mb-2">Relayers</h3>
+            <p className="text-sm text-white/40">Network nodes.</p>
+          </div>
+        </Link>
+
+        <div className="md:col-span-2 card py-6 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium text-white mb-1">Status</h3>
+            <p className="text-[11px] uppercase tracking-widest text-green-500 font-bold">Operational</p>
+          </div>
+          <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
         </div>
       </div>
 
-      {/* Features Section */}
-      <div id="features" className="mb-16">
-        <div className="mb-12">
-          <h2 className="text-4xl font-bold text-slate-100 mb-3">Protocol Features</h2>
-          <p className="text-slate-400 text-lg">Powerful tools for secure token management</p>
-        </div>
-
-        <BentoGrid>
-          {/* Featured Card - Takes more space */}
-          <Link href="/deposit" className="md:col-span-2 lg:col-span-2">
-            <Card title="Deposit Vault" badge="Primary">
-              <p className="text-slate-300 mb-6 leading-relaxed">
-                Securely deposit tokens into the privacy vault with full encryption and commitment-based access control.
-              </p>
-              <div className="h-32 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-xl border border-purple-500/20 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-sm text-slate-400 mb-2">Fast & Secure</div>
-                  <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text">Deposit</div>
-                </div>
-              </div>
-              <div className="text-sm text-purple-400 font-semibold mt-4">
-                Start Depositing
-              </div>
-            </Card>
-          </Link>
-
-          <Link href="/withdraw">
-            <Card title="Withdraw" badge="Advanced">
-              <p className="text-slate-300 mb-6 text-sm">
-                Withdraw tokens with valid zero-knowledge proofs or relayer attestation.
-              </p>
-              <div className="h-20 bg-gradient-to-br from-indigo-500/10 to-cyan-500/10 rounded-lg border border-indigo-500/20 flex items-center justify-center">
-                <div className="text-sm font-medium text-slate-300">ZK-Powered</div>
-              </div>
-              <div className="text-sm text-indigo-400 font-semibold mt-4">
-                Request Withdrawal
-              </div>
-            </Card>
-          </Link>
-
-          <Link href="/admin">
-            <Card title="Admin Panel" badge="Control">
-              <p className="text-slate-300 mb-4 text-sm">
-                Protocol initialization and management utilities.
-              </p>
-              <div className="text-xs text-slate-400 space-y-2">
-                <div>Initialize protocol</div>
-                <div>Manage settings</div>
-              </div>
-              <div className="text-sm text-cyan-400 font-semibold mt-4">
-                Open Panel
-              </div>
-            </Card>
-          </Link>
-
-          <Link href="/relayer" className="lg:col-span-1">
-            <Card title="Relayers" badge="Network">
-              <p className="text-slate-300 text-sm mb-4">
-                Register and manage relayers for transaction processing.
-              </p>
-              <div className="text-sm text-purple-400 font-semibold">
-                Manage Relayers
-              </div>
-            </Card>
-          </Link>
-
-          <Link href="/debug" className="lg:col-span-1">
-            <Card title="Debug" badge="Developer">
-              <p className="text-slate-300 text-sm mb-4">
-                View on-chain state and account debugging.
-              </p>
-              <div className="text-sm text-indigo-400 font-semibold">
-                View State
-              </div>
-            </Card>
-          </Link>
-        </BentoGrid>
-      </div>
-
-      {/* Info Section with Curved Design */}
-      <div className="relative mt-20 mb-8">
-        <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-purple-500/20 to-transparent rounded-full blur-3xl -z-10" />
-        
-        <div className="card border-purple-500/40 rounded-3xl">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-2xl font-bold text-slate-100 mb-4">Getting Started</h3>
-              <ul className="space-y-3 text-slate-300">
-                <li className="flex gap-3">
-                  <span className="text-indigo-400 font-bold min-w-fit">Step 1</span>
-                  <span>Connect your Phantom wallet using the button in the top right</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-purple-400 font-bold min-w-fit">Step 2</span>
-                  <span>Navigate to Deposit to add funds to the secure vault</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-cyan-400 font-bold min-w-fit">Step 3</span>
-                  <span>Use Admin or Relayer panels for protocol management</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-indigo-400 font-bold min-w-fit">Step 4</span>
-                  <span>Monitor on-chain state with the Debug panel</span>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-slate-100 mb-4">Key Features</h3>
-              <ul className="space-y-3 text-slate-300">
-                <li className="flex gap-3">
-                  <span className="text-sm text-purple-400 min-w-fit">•</span>
-                  <span>Zero-Knowledge Proof integration</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-sm text-indigo-400 min-w-fit">•</span>
-                  <span>Built-in relayer attestation</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-sm text-cyan-400 min-w-fit">•</span>
-                  <span>Privacy-preserving transactions</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-sm text-purple-400 min-w-fit">•</span>
-                  <span>Solana blockchain security</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+      {/* Footer Info */}
+      <div className="border-t border-white/5 pt-24 pb-24 text-center">
+        <h3 className="text-sm font-medium uppercase tracking-[0.3em] text-white/20 mb-12">Built for Solana</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 opacity-20 grayscale hover:grayscale-0 transition-all duration-700">
+          <div className="text-xl font-bold">SOLANA</div>
+          <div className="text-xl font-bold">ANCHOR</div>
+          <div className="text-xl font-bold">RUST</div>
+          <div className="text-xl font-bold">NEXTJS</div>
         </div>
       </div>
     </div>

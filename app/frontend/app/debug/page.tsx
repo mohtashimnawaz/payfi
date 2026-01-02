@@ -25,23 +25,24 @@ export default function DebugPage(){
   useEffect(()=>{ fetchState(); }, [connected]);
 
   return (
-    <div>
-      <div className="mb-10 animate-fadeInUp">
-        <h1 className="text-4xl font-bold mb-3 gradient-text">Debug Console</h1>
-        <p className="text-slate-400">View on-chain protocol state and account debugging.</p>
+    <div className="reveal">
+      <div className="mb-12">
+        <h1 className="text-4xl font-medium text-white mb-4 tracking-tight">Debug Console</h1>
+        <p className="text-white/40 text-lg max-w-2xl">View on-chain protocol state and account debugging.</p>
       </div>
+      
       <BentoGrid>
         <div className="lg:col-span-3">
-          <Card title="On-chain Vault State">
-            <div className="space-y-4">
+          <Card title="On-chain Vault State" badge="Developer">
+            <div className="space-y-6">
               <button 
                 onClick={fetchState}
-                className="btn-secondary w-full py-2 font-medium"
+                className="btn-secondary w-full py-3 font-medium"
               >
-                🔄 Refresh State
+                Refresh State
               </button>
-              <div className="bg-slate-900/70 rounded-lg p-4 border border-slate-700/50 overflow-x-auto max-h-96 overflow-y-auto">
-                <pre className="text-xs font-mono text-slate-300 whitespace-pre-wrap break-words">
+              <div className="bg-white/[0.02] rounded-2xl p-6 border border-white/[0.05] overflow-x-auto max-h-[500px] overflow-y-auto">
+                <pre className="text-xs font-mono text-white/40 whitespace-pre-wrap break-words leading-relaxed">
                   {info ? JSON.stringify(info, null, 2) : 'No data loaded. Click Refresh to fetch.'}
                 </pre>
               </div>

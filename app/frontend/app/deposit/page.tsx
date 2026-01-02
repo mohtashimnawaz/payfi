@@ -84,20 +84,57 @@ export default function DepositPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Deposit</h1>
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold mb-3 text-slate-100">🏦 Deposit Funds</h1>
+        <p className="text-slate-400">Securely deposit tokens into the privacy vault.</p>
+      </div>
       <BentoGrid>
-        <Card title="Deposit">
-          <div className="flex flex-col gap-3">
-            <div className="text-sm text-slate-700">Connected: <span className="font-medium">{connected ? 'Yes' : 'No'}</span></div>
-            <div className="text-sm text-slate-700">Vault token account: <span className="font-mono text-xs">{vaultTokenAccount ?? 'unknown'}</span></div>
-            <label className="text-sm">Amount</label>
-            <input className="border rounded px-3 py-2" type="number" value={amount} onChange={(e)=>setAmount(parseInt(e.target.value))} />
-            <button className="bg-primary text-white px-4 py-2 rounded hover:bg-accent disabled:opacity-50" onClick={handleDeposit} disabled={!connected}>Deposit</button>
-            {status && <div className="mt-2 text-sm text-slate-700">{status}</div>}
-          </div>
-        </Card>
-        <Card title="Instructions">
-          <ol className="text-sm list-decimal list-inside text-slate-600">
+        <div className="lg:col-span-2">
+          <Card title="Deposit Transaction">
+            <div className="space-y-5">
+              <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+                <div className="text-sm text-slate-400 mb-1">Wallet Status</div>
+                <div className={`text-lg font-semibold ${connected ? 'text-green-400' : 'text-red-400'}`}>
+                  {connected ? '✓ Connected' : '✗ Not Connected'}
+                </div>
+              </div>
+              
+              {vaultTokenAccount && (
+                <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+                  <div className="text-sm text-slate-400 mb-2">Vault Account</div>
+                  <code className="text-xs font-mono text-purple-300 break-all">{vaultTokenAccount}</code>
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Amount (tokens)</label>
+                <input 
+                  type="number" 
+                  value={amount} 
+                  onChange={(e)=>setAmount(parseInt(e.target.value))} 
+                  className="w-full"
+                  placeholder="100"
+                />
+              </div>
+              
+              <button 
+                onClick={handleDeposit} 
+                disabled={!connected}
+                className="btn-primary w-full py-3 font-semibold text-lg"
+              >
+                💎 Execute Deposit
+              </button>
+              
+              {status && (
+                <div className={`p-4 rounded-lg border ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/20 border-red-500/50 text-red-300' : 'bg-purple-500/20 border-purple-500/50 text-purple-300'}`}>
+                  <p className="text-sm">{status}</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+        <Card title="ℹ️ Instructions">
+          <ol className="text-sm list-decimal list-inside space-y-2 text-slate-300">
             <li>Connect a wallet (Phantom or mobile wallet)</li>
             <li>Ensure you have an SPL token account with the same mint as the vault</li>
             <li>Click Deposit</li>

@@ -37,24 +37,45 @@ export default function AdminPage(){
   }
 
   return (
-    <div className="container px-4 py-6 mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-slate-900">Admin Panel</h1>
+    <div>
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold mb-3 text-slate-100">⚙️ Admin Panel</h1>
+        <p className="text-slate-400">Protocol initialization and management.</p>
+      </div>
       <BentoGrid>
-        <Card title="Initialize Program">
-          <div className="flex flex-col gap-4">
-            <div className="text-sm text-slate-600">Connected: <span className={connected ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>{connected ? 'Yes' : 'No'}</span></div>
+        <Card title="Program Initialization">
+          <div className="space-y-5">
+            <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+              <div className="text-sm text-slate-400 mb-1">Wallet Status</div>
+              <div className={`text-lg font-semibold ${connected ? 'text-green-400' : 'text-red-400'}`}>
+                {connected ? '✓ Connected' : '✗ Not Connected'}
+              </div>
+            </div>
+            
             <button 
               onClick={handleInitialize} 
               disabled={!connected}
-              className="bg-primary text-white font-semibold rounded px-4 py-2 disabled:opacity-50 hover:bg-accent transition-colors"
+              className="btn-primary w-full py-3 font-semibold text-lg"
             >
-              Call Initialize
+              🚀 Initialize Protocol
             </button>
-            {status && <div className="mt-4 p-3 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">{status}</div>}
+            
+            {status && (
+              <div className={`p-4 rounded-lg border ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/20 border-red-500/50 text-red-300' : 'bg-green-500/20 border-green-500/50 text-green-300'}`}>
+                <p className="text-sm">{status}</p>
+              </div>
+            )}
           </div>
         </Card>
-        <Card title="Notes">
-          <p className="text-sm text-slate-600 leading-relaxed">Use the <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono text-slate-800">scripts/init_devnet.ts</code> script for full initialization (recommended).</p>
+        
+        <Card title="📋 Best Practices">
+          <div className="space-y-3 text-slate-300 text-sm">
+            <p className="font-semibold text-slate-200">For complete setup:</p>
+            <code className="block bg-slate-900/50 p-3 rounded text-xs font-mono text-amber-300 break-all">
+              pnpm ts-node scripts/init_devnet.ts
+            </code>
+            <p className="text-xs text-slate-400">Full initialization script handles all setup automatically.</p>
+          </div>
         </Card>
       </BentoGrid>
     </div>

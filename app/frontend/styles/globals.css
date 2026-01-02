@@ -1,24 +1,83 @@
 @import "tailwindcss";
 
-@layer components {
-  .container {
-    @apply max-w-6xl mx-auto px-6;
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-slate-100 antialiased;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   }
-  .header {
-    @apply flex items-center justify-between py-6;
-  }
-  .card {
-    @apply bg-white border border-slate-100 rounded-lg shadow-sm p-6;
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
   }
 }
 
-/* Global styling */
-body {
-  @apply bg-gray-50 text-slate-900 antialiased;
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .header {
+    @apply sticky top-0 z-40 backdrop-blur-md bg-slate-900/80 border-b border-purple-500/20;
+  }
+  
+  .card {
+    @apply bg-slate-800/50 border border-purple-500/30 rounded-xl shadow-lg p-6 transition-all duration-300;
+  }
+  
+  .card:hover {
+    @apply shadow-2xl border-purple-500/60 bg-slate-800/70;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    @apply from-purple-700 to-purple-800 shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-slate-700 text-slate-100 font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary:hover:not(:disabled) {
+    @apply bg-slate-600;
+  }
+  
+  .badge {
+    @apply inline-block px-3 py-1 bg-purple-500/30 text-purple-200 rounded-full text-xs font-medium border border-purple-500/50;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    @apply text-slate-100 drop-shadow-lg;
+  }
+  
+  .glow-border {
+    @apply border-purple-500/30 hover:border-purple-500/60 transition-colors;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 
 code {
-  @apply bg-slate-100 px-2 py-1 rounded text-sm font-mono;
+  @apply bg-slate-800 px-2 py-1 rounded text-sm font-mono text-amber-400;
+}
+
+/* Input styling */
+input, textarea, select {
+  @apply bg-slate-800 border border-purple-500/30 text-slate-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all;
+}
+
+input::placeholder, textarea::placeholder {
+  @apply text-slate-500;
 }
 

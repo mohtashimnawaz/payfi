@@ -50,32 +50,58 @@ export default function WithdrawPage() {
   }
 
   return (
-    <div className="container px-4 py-6 mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-slate-900">Withdraw</h1>
+    <div>
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold mb-3 text-slate-100">💰 Withdraw Funds</h1>
+        <p className="text-slate-400">Withdraw tokens with valid ZK proofs or relayer attestation.</p>
+      </div>
       <BentoGrid>
-        <Card title="Withdraw">
-          <div className="flex flex-col gap-4">
-            <div className="text-sm text-slate-600">Connected: <span className={connected ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>{connected ? 'Yes' : 'No'}</span></div>
-            <label className="text-sm font-medium text-slate-700">Amount (tokens)</label>
-            <input 
-              type="number" 
-              value={amount} 
-              onChange={(e)=>setAmount(parseInt(e.target.value))} 
-              className="border border-slate-300 rounded px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Enter amount"
-            />
-            <button 
-              onClick={handleWithdraw} 
-              disabled={!connected}
-              className="bg-primary text-white font-semibold rounded px-4 py-2 disabled:opacity-50 hover:bg-accent transition-colors"
-            >
-              Withdraw (ZK required)
-            </button>
-            {status && <div className="mt-4 p-3 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">{status}</div>}
+        <div className="lg:col-span-2">
+          <Card title="Withdrawal Request">
+            <div className="space-y-5">
+              <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+                <div className="text-sm text-slate-400 mb-1">Wallet Status</div>
+                <div className={`text-lg font-semibold ${connected ? 'text-green-400' : 'text-red-400'}`}>
+                  {connected ? '✓ Connected' : '✗ Not Connected'}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Amount (tokens)</label>
+                <input 
+                  type="number" 
+                  value={amount} 
+                  onChange={(e)=>setAmount(parseInt(e.target.value))} 
+                  className="w-full"
+                  placeholder="100"
+                />
+              </div>
+              
+              <button 
+                onClick={handleWithdraw} 
+                disabled={!connected}
+                className="btn-primary w-full py-3 font-semibold text-lg"
+              >
+                🔓 Initiate Withdrawal
+              </button>
+              
+              {status && (
+                <div className={`p-4 rounded-lg border ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/20 border-red-500/50 text-red-300' : 'bg-purple-500/20 border-purple-500/50 text-purple-300'}`}>
+                  <p className="text-sm">{status}</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+        <Card title="⚠️ Important">
+          <div className="space-y-3 text-slate-300">
+            <p className="text-sm">This withdrawal flow requires:</p>
+            <ul className="text-xs space-y-1 list-disc list-inside text-slate-400">
+              <li>Valid zero-knowledge proofs</li>
+              <li>Or relayer attestation</li>
+              <li>Frontend can't generate ZK proofs yet</li>
+            </ul>
           </div>
-        </Card>
-        <Card title="Notes">
-          <p className="text-sm text-slate-600 leading-relaxed">This page is a placeholder — withdraw flow requires valid ZK proofs or relayer attestations which the frontend can't generate yet.</p>
         </Card>
       </BentoGrid>
     </div>

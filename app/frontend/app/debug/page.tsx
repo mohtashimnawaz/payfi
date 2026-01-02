@@ -25,14 +25,29 @@ export default function DebugPage(){
   useEffect(()=>{ fetchState(); }, [connected]);
 
   return (
-    <div className="container px-4 py-6 mx-auto">
-      <h1 className="text-4xl font-bold mb-8 text-slate-900">Debug Console</h1>
+    <div>
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold mb-3 text-slate-100">🔍 Debug Console</h1>
+        <p className="text-slate-400">View on-chain PDAs and account state for debugging.</p>
+      </div>
       <BentoGrid>
-        <Card title="On-chain State">
-          <div className="bg-slate-900 rounded p-4 text-slate-100 text-xs font-mono overflow-x-auto">
-            <pre className="whitespace-pre-wrap">{JSON.stringify(info, null, 2)}</pre>
-          </div>
-        </Card>
+        <div className="lg:col-span-3">
+          <Card title="📊 On-chain Vault State">
+            <div className="space-y-4">
+              <button 
+                onClick={fetchState}
+                className="btn-secondary w-full py-2 font-medium"
+              >
+                🔄 Refresh State
+              </button>
+              <div className="bg-slate-900/70 rounded-lg p-4 border border-slate-700/50 overflow-x-auto max-h-96 overflow-y-auto">
+                <pre className="text-xs font-mono text-slate-300 whitespace-pre-wrap break-words">
+                  {info ? JSON.stringify(info, null, 2) : 'No data loaded. Click Refresh to fetch.'}
+                </pre>
+              </div>
+            </div>
+          </Card>
+        </div>
       </BentoGrid>
     </div>
   );

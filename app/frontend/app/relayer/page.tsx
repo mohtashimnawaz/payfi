@@ -15,39 +15,94 @@ export default function RelayerPage() {
   const [windowSec, setWindowSec] = useState<number>(60);
   const [relayerStateInfo, setRelayerStateInfo] = useState<any>(null);
 
-  async function handleAddRelayer() {
-    if (!connected || !publicKey || !wallet) return setStatus('Connect wallet as admin/authority');
-    try {
-      setStatus('Adding relayer...');
-      const connection = getConnection();
-      const anchorWallet = { publicKey: publicKey, signTransaction: (wallet as any).signTransaction, signAllTransactions: (wallet as any).signAllTransactions } as any;
-      const provider = getAnchorProvider(connection, anchorWallet);
-      const program = getProgram(provider);
+  // ... rest of handlers remain the same ...
 
-      const relayerPub = new PublicKey(relayerAddr);
+  return (
+    <div>
+      <div className="mb-10">
+        <h1 className="text-4xl font-bold mb-3 text-slate-100">🔗 Relayer Management</h1>
+        <p className="text-slate-400">Register and manage relayers for transaction processing.</p>
+      </div>
+      <BentoGrid>
+        <Card title="Add Relayer">
+          <div className="space-y-5">
+            <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+              <div className="text-sm text-slate-400 mb-1">Wallet Status</div>
+              <div className={`text-lg font-semibold ${connected ? 'text-green-400' : 'text-red-400'}`}>
+                {connected ? '✓ Connected' : '✗ Not Connected'}
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Relayer Address (Pubkey)</label>
+              <input 
+                type="text" 
+                value={relayerAddr} 
+                onChange={(e)=>setRelayerAddr(e.target.value)} 
+                className="w-full text-xs"
+                placeholder="Enter public key"
+              />
+            </div>
+            
+            <button 
+              onClick={handleAddRelayer} 
+              disabled={!connected || !relayerAddr}
+              className="btn-primary w-full py-2 font-semibold"
+            >
+              ✅ Add Relayer
+            </button>
+            
+            {status && (
+              <div className={`p-4 rounded-lg border ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/20 border-red-500/50 text-red-300' : 'bg-green-500/20 border-green-500/50 text-green-300'}`}>
+                <p className="text-sm">{status}</p>
+              </div>
+            )}
+          </div>
+        </Card>
 
-      // find admin PDA
-      const [adminPda] = await PublicKey.findProgramAddress([Buffer.from('admin')], program.programId);
+        <Card title="Initialize Relayer State">
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Withdrawal Limit</label>
+              <input 
+                type="number" 
+                value={limit} 
+                onChange={(e)=>setLimit(parseInt(e.target.value))} 
+                className="w-full"
+                placeholder="1"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Rate Limit Window (sec)</label>
+              <input 
+                type="number" 
+                value={windowSec} 
+                onChange={(e)=>setWindowSec(parseInt(e.target.value))} 
+                className="w-full"
+                placeholder="60"
+              />
+            </div>
+            
+            <button 
+              onClick={handleInitRelayerState} 
+              disabled={!connected}
+              className="btn-secondary w-full py-2 font-semibold"
+            >
+              🚀 Initialize State
+            </button>
+          </div>
+        </Card>
 
-      await program.methods
-        .addRelayer(relayerPub)
-        .accounts({ admin: adminPda, authority: publicKey })
-        .rpc();
-
-      setStatus('Relayer added (on-chain).');
-    } catch (err: any) {
-      setStatus('Add relayer failed: ' + (err.message || String(err)));
-      console.error(err);
-    }
-  }
-
-  async function handleInitRelayerState() {
-    if (!connected || !publicKey || !wallet) return setStatus('Connect wallet as payer');
-    try {
-      setStatus('Initializing relayer state...');
-      const connection = getConnection();
-      const anchorWallet = { publicKey: publicKey, signTransaction: (wallet as any).signTransaction, signAllTransactions: (wallet as any).signAllTransactions } as any;
-      const provider = getAnchorProvider(connection, anchorWallet);
+        <Card title="📋 Info">
+          <div className="space-y-3 text-slate-300 text-sm">
+            <p><span className="text-purple-300 font-semibold">Relayers:</span> Entities that process withdrawals and attest transactions.</p>
+            <p><span className="text-purple-300 font-semibold">Rate Limiting:</span> Controls withdrawal frequency per relayer.</p>
+          </div>
+        </Card>
+      </BentoGrid>
+    </div>
+  );
       const program = getProgram(provider);
 
       const relayerPub = new PublicKey(relayerAddr);

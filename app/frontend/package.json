@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sync:idl": "node ../../scripts/sync-frontend-artifacts.js"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

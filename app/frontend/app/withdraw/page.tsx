@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import * as anchor from '@coral-xyz/anchor';
 import { getConnection, getAnchorProvider, getProgram } from '../../src/lib/anchor';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import BentoGrid from '../../src/components/BentoGrid';
 import Card from '../../src/components/Card';
 
@@ -38,7 +39,7 @@ export default function WithdrawPage() {
           vault: vaultPda,
           vaultTokenAccount: anchor.web3.PublicKey.default,
           treeState: treePda,
-          tokenProgram: anchor.web3.TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
 

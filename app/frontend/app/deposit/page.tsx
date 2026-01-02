@@ -21,8 +21,9 @@ export default function DepositPage() {
         const provider = getAnchorProvider(connection, (wallet as any));
         const program = getProgram(provider);
         const [vaultPda] = await PublicKey.findProgramAddress([Buffer.from('vault')], program.programId);
-        const vaultState: any = await program.account.vault.fetch(vaultPda);
-        setVaultTokenAccount(vaultState.tokenAccount ?? vaultState.token_account?.toString() ?? null);
+        const vaultState = await program.account.vault.fetch(vaultPda);
+        // `vaultState` will be typed when `getProgram` returns a Program<Payfi>.
+        setVaultTokenAccount((vaultState as any).tokenAccount ?? (vaultState as any).token_account?.toString() ?? null);
       } catch (err) {
         console.warn('Unable to load vault state', err);
       }
@@ -54,7 +55,7 @@ export default function DepositPage() {
       commitment[0] = 1;
 
       // Use first token account for user's wallet as from account
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, { programId: anchor.web3.TOKEN_PROGRAM_ID });
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, { programId: TOKEN_PROGRAM_ID });
       if (!tokenAccounts.value || tokenAccounts.value.length === 0) {
         setStatus('No token accounts found for your wallet. Please fund a SPL token and try again.');
         return;

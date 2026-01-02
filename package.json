@@ -3,7 +3,8 @@
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-    "smoke:devnet": "cross-env RUN_DEVNET_SMOKE=1 ts-mocha -p ./tsconfig.json tests/devnet-smoke.ts"
+    "smoke:devnet": "cross-env RUN_DEVNET_SMOKE=1 ts-mocha -p ./tsconfig.json tests/devnet-smoke.ts",
+    "sync:frontend-artifacts": "node scripts/sync-frontend-artifacts.js"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",

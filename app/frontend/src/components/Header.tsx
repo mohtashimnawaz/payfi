@@ -12,17 +12,18 @@ export default function Header() {
 
   return (
     <header className="header flex items-center justify-between py-5 px-6 mb-12">
-      <Link href="/" className="flex items-center gap-3 group">
-        {/* Animated Logo Left */}
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl animate-float" style={{animationDuration: '3s'}} />
-          <div className="absolute inset-1 bg-slate-950 rounded-lg flex items-center justify-center group-hover:bg-slate-900 transition-colors">
-            <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent animate-pulse">P</span>
+      <Link href="/" className="flex items-center gap-4 group">
+        {/* Improved Animated Logo Left */}
+        <div className="relative w-12 h-12 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 rounded-xl animate-spin-slow blur-[2px] opacity-70 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-[2px] bg-slate-950 rounded-[10px] flex items-center justify-center z-10">
+            <span className="text-xl font-black bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent animate-pulse-soft">P</span>
           </div>
+          <div className="absolute -inset-1 bg-gradient-to-tr from-purple-600/20 to-cyan-400/20 rounded-xl blur-lg group-hover:blur-xl transition-all" />
         </div>
         <div>
-          <h1 className="text-xl font-bold gradient-text">PayFi</h1>
-          <p className="text-xs text-slate-500 -mt-1">Finance Protocol</p>
+          <h1 className="text-xl font-bold tracking-tight text-white group-hover:text-purple-300 transition-colors">PayFi</h1>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-semibold">Protocol</p>
         </div>
       </Link>
 
@@ -57,14 +58,6 @@ export default function Header() {
             <WalletMultiButton />
           </div>
         )}
-        
-        {/* Animated Logo Right */}
-        <div className="hidden sm:flex relative w-10 h-10">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-lg animate-float" style={{animationDuration: '4s', animationDelay: '0.5s'}} />
-          <div className="absolute inset-1 bg-slate-950 rounded-md flex items-center justify-center">
-            <span className="text-xs font-bold text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text">F</span>
-          </div>
-        </div>
       </div>
     </header>
   );

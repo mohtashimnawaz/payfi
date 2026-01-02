@@ -26,13 +26,13 @@ export default function DebugPage(){
 
   return (
     <div>
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold mb-3 text-slate-100">🔍 Debug Console</h1>
-        <p className="text-slate-400">View on-chain PDAs and account state for debugging.</p>
+      <div className="mb-10 animate-fadeInUp">
+        <h1 className="text-4xl font-bold mb-3 gradient-text">Debug Console</h1>
+        <p className="text-slate-400">View on-chain protocol state and account debugging.</p>
       </div>
       <BentoGrid>
         <div className="lg:col-span-3">
-          <Card title="📊 On-chain Vault State">
+          <Card title="On-chain Vault State">
             <div className="space-y-4">
               <button 
                 onClick={fetchState}

@@ -19,9 +19,9 @@ export default function RelayerPage() {
 
   return (
     <div>
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold mb-3 text-slate-100">🔗 Relayer Management</h1>
-        <p className="text-slate-400">Register and manage relayers for transaction processing.</p>
+      <div className="mb-10 animate-fadeInUp">
+        <h1 className="text-4xl font-bold mb-3 gradient-text">Relayer Management</h1>
+        <p className="text-slate-400">Register and manage relayers for transaction processing and attestation.</p>
       </div>
       <BentoGrid>
         <Card title="Add Relayer">

@@ -38,7 +38,7 @@ export default function Home() {
       </div>
 
       {/* Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-5 mb-32">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-5 -mt-24 mb-32">
         {/* Main Feature */}
         <Link href="/deposit" className="md:col-span-4 group">
           <div className="card card--primary h-full flex flex-col justify-between relative overflow-hidden">

@@ -3,7 +3,7 @@
 :root {
   --bg: #f6f7fb; /* slightly warmer, not flat white */
   --text: #041025; /* deeper text for higher contrast */
-  --muted: #59626c; /* slightly richer muted */
+  --muted: #49545c; /* darker muted for stronger contrast */
   --card: #ffffff;
   --card-surface: linear-gradient(180deg, #ffffff, #fbfdff);
   --card-border: rgba(2, 6, 23, 0.06);
@@ -93,9 +93,30 @@
     transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
     backdrop-filter: blur(6px);
     animation: reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    box-shadow: var(--shadow);
+    box-shadow: 0 18px 48px rgba(2,6,23,0.12);
     position: relative;
     overflow: hidden;
+  }
+
+  /* Slightly elevated default look for all cards */
+  .card:not(.card--primary) {
+    background: linear-gradient(180deg, #ffffff, #fcfdff);
+    border-color: rgba(2,6,23,0.03);
+    box-shadow: 0 16px 40px rgba(2,6,23,0.07);
+  }
+
+  /* bottom soft shadow for extra depth */
+  .card::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 10px;
+    height: 30px;
+    border-radius: 12px;
+    background: radial-gradient(closest-side, rgba(2,6,23,0.06), transparent 60%);
+    opacity: .9;
+    pointer-events: none;
   }
 
   .card::before {

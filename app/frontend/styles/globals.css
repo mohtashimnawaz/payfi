@@ -18,17 +18,17 @@
 }
 
 .theme-dark {
-  --bg: #0a0a14;
-  --text: #f5f5f7;
-  --muted: #9ca3af;
-  --card: rgba(255,255,255,0.01);
-  --card-border: rgba(255,255,255,0.05);
-  --glass: rgba(255,255,255,0.02);
+  --bg: #06060a;
+  --text: #f8fafc;
+  --muted: #cbd5e1; /* brighter muted for readability */
+  --card: rgba(255,255,255,0.04); /* slightly stronger surface */
+  --card-border: rgba(255,255,255,0.06);
+  --glass: rgba(255,255,255,0.04);
   --accent-from: #6366f1;
   --accent-via: #a855f7;
   --accent-to: #ec4899;
   --shadow: 0 6px 30px rgba(2,6,23,0.6);
-}
+} 
 
 @layer base {
   body {
@@ -83,6 +83,20 @@
     border-bottom: 1px solid rgba(255,255,255,0.03);
     box-shadow: none;
   }
+
+  /* Logo inner: ensure visibility across themes */
+  .logo-inner {
+    transition: background-color .18s ease, border-color .18s ease;
+  }
+
+  .theme-dark .logo-inner {
+    background-color: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: none;
+  }
+
+  /* Make sure the letter stays readable on dark theme */
+  .theme-dark .logo-inner span { color: var(--text); }
   
   .card {
     background: var(--card-surface);
@@ -160,6 +174,24 @@
     background: linear-gradient(90deg, var(--accent-from), var(--accent-via), var(--accent-to));
     opacity: .12;
   }
+
+  /* Dark theme card overrides for improved contrast */
+  .theme-dark .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-color: rgba(255,255,255,0.04);
+    color: var(--text);
+    box-shadow: 0 12px 40px rgba(2,6,23,0.55);
+  }
+
+  .theme-dark .card:not(.card--primary) {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));
+    border-color: rgba(255,255,255,0.03);
+  }
+
+  .theme-dark .card .text-muted { color: var(--muted); opacity: .95; }
+
+  .theme-dark .card::after { background: radial-gradient(closest-side, rgba(0,0,0,0.32), transparent 60%); opacity: .85; }
+  
   
   .btn-primary {
     background: linear-gradient(90deg, var(--accent-from), var(--accent-via), var(--accent-to));
@@ -334,6 +366,14 @@ input, textarea, select {
   outline: none;
   transition: all 0.15s ease;
 }
+
+.theme-dark input, .theme-dark textarea, .theme-dark select {
+  background-color: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.04);
+  color: var(--text);
+}
+
+.theme-dark code, .theme-dark pre { color: var(--muted); }
 
 input::placeholder, textarea::placeholder {
   color: var(--muted);

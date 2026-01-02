@@ -31,7 +31,7 @@ export default function Header() {
             {/* Rotating iridescent border */}
             <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl animate-spin-slow opacity-40 group-hover:opacity-100 transition-opacity duration-700" />
             {/* Inner background */}
-            <div className="absolute inset-[1.5px] bg-white rounded-[10px] flex items-center justify-center z-10 shadow-sm">
+            <div className="absolute inset-[1.5px] bg-white logo-inner rounded-[10px] flex items-center justify-center z-10 shadow-sm">
               <span className="text-lg font-bold text-body tracking-tighter">P</span>
             </div>
           </div>

@@ -52,8 +52,8 @@ export default function WithdrawPage() {
   return (
     <div>
       <div className="mb-10">
-        <h1 className="text-4xl font-bold mb-3 text-slate-100">💰 Withdraw Funds</h1>
-        <p className="text-slate-400">Withdraw tokens with valid ZK proofs or relayer attestation.</p>
+        <h1 className="text-4xl font-bold mb-3 gradient-text">Withdraw Funds</h1>
+        <p className="text-slate-400">Withdraw tokens with valid zero-knowledge proofs or relayer attestation.</p>
       </div>
       <BentoGrid>
         <div className="lg:col-span-2">

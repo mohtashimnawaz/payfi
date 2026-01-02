@@ -39,8 +39,8 @@ export default function AdminPage(){
   return (
     <div>
       <div className="mb-10">
-        <h1 className="text-4xl font-bold mb-3 text-slate-100">⚙️ Admin Panel</h1>
-        <p className="text-slate-400">Protocol initialization and management.</p>
+        <h1 className="text-4xl font-bold mb-3 gradient-text">Admin Panel</h1>
+        <p className="text-slate-400">Protocol initialization and management utilities.</p>
       </div>
       <BentoGrid>
         <Card title="Program Initialization">

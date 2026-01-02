@@ -84,9 +84,9 @@ export default function DepositPage() {
 
   return (
     <div>
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold mb-3 text-slate-100">🏦 Deposit Funds</h1>
-        <p className="text-slate-400">Securely deposit tokens into the privacy vault.</p>
+      <div className="mb-10 animate-fadeInUp">
+        <h1 className="text-4xl font-bold mb-3 gradient-text">Deposit Funds</h1>
+        <p className="text-slate-400">Securely deposit tokens into the privacy vault with full encryption.</p>
       </div>
       <BentoGrid>
         <div className="lg:col-span-2">

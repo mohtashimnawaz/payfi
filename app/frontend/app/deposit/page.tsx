@@ -21,7 +21,7 @@ export default function DepositPage() {
         const provider = getAnchorProvider(connection, (wallet as any));
         const program = getProgram(provider);
         const [vaultPda] = await PublicKey.findProgramAddress([Buffer.from('vault')], program.programId);
-        const vaultState = await program.account.vault.fetch(vaultPda);
+        const vaultState = await (program.account as any).vault.fetch(vaultPda);
         // `vaultState` will be typed when `getProgram` returns a Program<Payfi>.
         setVaultTokenAccount((vaultState as any).tokenAccount ?? (vaultState as any).token_account?.toString() ?? null);
       } catch (err) {
@@ -63,7 +63,7 @@ export default function DepositPage() {
       const from = new PublicKey(tokenAccounts.value[0].pubkey.toString());
 
       setStatus('Sending deposit transaction...');
-      await program.methods
+      await (program as any).methods
         .deposit(new anchor.BN(amount), Buffer.from(commitment), null)
         .accounts({
           user: publicKey,

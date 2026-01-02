@@ -25,7 +25,7 @@ export default function RelayerPage() {
       const [adminPda] = await PublicKey.findProgramAddress([Buffer.from('admin')], program.programId);
       const relayerPub = new PublicKey(relayerAddr);
 
-      await program.methods
+      await (program as any).methods
         .addRelayer(relayerPub)
         .accounts({ admin: adminPda, payer: publicKey })
         .rpc();
@@ -47,7 +47,7 @@ export default function RelayerPage() {
       const relayerPub = new PublicKey(relayerAddr);
       const [relayerStatePda] = await PublicKey.findProgramAddress([Buffer.from('relayer_state'), relayerPub.toBuffer()], program.programId);
 
-      await program.methods
+      await (program as any).methods
         .initRelayerState(relayerPub, new anchor.BN(limit), new anchor.BN(windowSec))
         .accounts({ relayerState: relayerStatePda, payer: publicKey, systemProgram: SystemProgram.programId })
         .rpc();
@@ -68,7 +68,7 @@ export default function RelayerPage() {
       const program = getProgram(provider);
       const relayerPub = new PublicKey(relayerAddr);
       const [relayerStatePda] = await PublicKey.findProgramAddress([Buffer.from('relayer_state'), relayerPub.toBuffer()], program.programId);
-      const info = await program.account.relayerState.fetchNullable(relayerStatePda);
+      const info = await (program.account as any).relayerState.fetchNullable(relayerStatePda);
       setRelayerStateInfo(info);
       setStatus('Fetched relayer state');
     } catch (err: any) {

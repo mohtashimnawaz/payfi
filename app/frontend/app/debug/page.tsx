@@ -15,7 +15,7 @@ export default function DebugPage(){
       const provider = getAnchorProvider(connection, (wallet as any));
       const program = getProgram(provider);
       const [vaultPda] = await (window as any).PublicKey.findProgramAddress([Buffer.from('vault')], program.programId);
-      const vaultState = await program.account.vault.fetch(vaultPda);
+      const vaultState = await (program.account as any).vault.fetch(vaultPda);
       setInfo({ vaultState });
     }catch(err){
       setInfo({ error: String(err) });

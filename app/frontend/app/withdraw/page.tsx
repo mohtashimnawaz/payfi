@@ -30,7 +30,7 @@ export default function WithdrawPage() {
       const [vaultPda] = await anchor.web3.PublicKey.findProgramAddress([Buffer.from('vault')], program.programId);
 
       setStatus('Sending withdraw (likely to fail without a real proof)...');
-      await program.methods
+      await (program as any).methods
         .withdraw(Buffer.from([]), Buffer.from(nullifier), Buffer.from(commitment), new anchor.BN(amount))
         .accounts({
           user: publicKey,

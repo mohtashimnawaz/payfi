@@ -8,7 +8,7 @@ import Card from '../../src/components/Card';
 import { PageWrapper } from '../../src/components/PageWrapper';
 import { ScrollReveal, Parallax } from '../../src/components/ScrollAnimations';
 import { CircularProgress, ComparisonBar, VaultVisualizer } from '../../src/components/DataVisualization';
-import { ShieldIcon, PlugIcon, NetworkIcon } from '../../src/components/AnimatedIcons';
+import { ShieldIcon, PlugIcon, NetworkIcon, CurrencyIcon, UsersIcon, SettingsIcon } from '../../src/components/AnimatedIcons';
 import { motion } from 'framer-motion';
 
 interface MetricCard {
@@ -28,21 +28,21 @@ export default function AdminPage(){
     {
       label: 'TVL',
       value: '$2.5M',
-      icon: <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}><span className="text-2xl">💰</span></motion.div>,
+      icon: <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}><CurrencyIcon size={24} className="text-emerald-400" animate={false} /></motion.div>,
       trend: '+12.5%',
       color: 'emerald'
     },
     {
       label: 'Active Users',
       value: '1,247',
-      icon: <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 4, repeat: Infinity }}><span className="text-2xl">👥</span></motion.div>,
+      icon: <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 4, repeat: Infinity }}><UsersIcon size={24} className="text-blue-400" animate={false} /></motion.div>,
       trend: '+8.2%',
       color: 'blue'
     },
     {
       label: 'Vault Utilization',
       value: '78%',
-      icon: <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}><span className="text-2xl">⚙️</span></motion.div>,
+      icon: <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }}><SettingsIcon size={24} className="text-purple-400" animate={false} /></motion.div>,
       trend: '-2.1%',
       color: 'purple'
     },

@@ -14,7 +14,7 @@ import { FloatingInput } from '../../src/components/FloatingInput';
 import { TransactionStepper, type StepStatus } from '../../src/components/TransactionStepper';
 import { StatCard } from '../../src/components/AnimatedCounter';
 import { PageWrapper } from '../../src/components/PageWrapper';
-import { LinkIcon, PenIcon, HourglassIcon, SparkleIcon } from '../../src/components/AnimatedIcons';
+import { LinkIcon, PenIcon, HourglassIcon, SparkleIcon, CurrencyIcon, GlobeIcon, BoltIcon } from '../../src/components/AnimatedIcons';
 import { motion } from 'framer-motion';
 
 export default function DepositPage() {
@@ -165,9 +165,9 @@ export default function DepositPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-        <StatCard label="Deposit Amount" value={amount} suffix=" tokens" color="indigo" icon="💰" />
-        <StatCard label="Network" value={1} prefix="Devnet" color="purple" icon="🌐" />
-        <StatCard label="Gas Estimate" value={5000} suffix=" SOL" color="pink" icon="⚡" />
+        <StatCard label="Deposit Amount" value={amount} suffix=" tokens" color="indigo" icon={<CurrencyIcon size={24} className="text-indigo-400" animate={false} />} />
+        <StatCard label="Network" value={1} prefix="Devnet" color="purple" icon={<GlobeIcon size={24} className="text-purple-400" animate={false} />} />
+        <StatCard label="Gas Estimate" value={5000} suffix=" SOL" color="pink" icon={<BoltIcon size={24} className="text-pink-400" animate={false} />} />
       </div>
       
       <BentoGrid>

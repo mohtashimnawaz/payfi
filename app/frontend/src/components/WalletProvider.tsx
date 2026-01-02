@@ -5,6 +5,7 @@ import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { DEFAULT_PROVIDER_URL } from "../lib/anchor";
+import { WarningIcon } from "./AnimatedIcons";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 export default function WalletProviderComponent({ children }: { children: React.ReactNode }) {
@@ -50,7 +51,12 @@ export default function WalletProviderComponent({ children }: { children: React.
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect={autoConnect} onError={onError}>
         <WalletModalProvider>
-          {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4 mb-4 text-sm" role="alert">⚠️ {error}</div>}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4 mb-4 text-sm flex items-center gap-2" role="alert">
+              <WarningIcon size={18} className="text-red-600 flex-shrink-0" animate={false} />
+              {error}
+            </div>
+          )}
           {children}
         </WalletModalProvider>
       </WalletProvider>

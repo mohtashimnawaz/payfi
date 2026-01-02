@@ -11,7 +11,7 @@ import { TransactionStepper } from '../../src/components/TransactionStepper';
 import { PageWrapper } from '../../src/components/PageWrapper';
 import { ScrollReveal, Parallax } from '../../src/components/ScrollAnimations';
 import { PercentageBar, CircularProgress } from '../../src/components/DataVisualization';
-import { ShieldIcon, WalletIcon, LockIcon, CheckmarkIcon } from '../../src/components/AnimatedIcons';
+import { ShieldIcon, WalletIcon, LockIcon, CheckmarkIcon, CurrencyIcon, BoltIcon } from '../../src/components/AnimatedIcons';
 import { motion } from 'framer-motion';
 
 interface StatCard {
@@ -40,7 +40,7 @@ export default function WithdrawPage() {
     {
       label: 'Withdrawal Amount',
       value: amount.toLocaleString(),
-      icon: <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity }}><span className="text-2xl">💰</span></motion.div>,
+      icon: <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity }}><CurrencyIcon size={24} className="text-emerald-400" animate={false} /></motion.div>,
       subtext: 'USDC'
     },
     {
@@ -51,7 +51,7 @@ export default function WithdrawPage() {
     {
       label: 'Transaction Fee',
       value: '0.01',
-      icon: <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 4, repeat: Infinity }}><span className="text-2xl">⚡</span></motion.div>,
+      icon: <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 4, repeat: Infinity }}><BoltIcon size={24} className="text-yellow-400" animate={false} /></motion.div>,
       subtext: 'SOL'
     },
   ];

@@ -12,7 +12,9 @@ export default function Header() {
 
   const [theme, setTheme] = useState<'light'|'dark'>(() => {
     if (typeof window === 'undefined') return 'light';
-    return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark' || stored === 'light') return stored as 'dark' | 'light';
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
   });
 
   useEffect(() => {
@@ -61,8 +63,21 @@ export default function Header() {
             Devnet
           </div>
           {mounted && (
-            <div className="prism-glow">
-              <WalletMultiButton className="!bg-white !text-black !h-11 !px-6 !rounded-full !font-semibold !text-sm !transition-all !duration-500 hover:!shadow-[0_0_30px_rgba(255,255,255,0.2)] active:!scale-95" />
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                role="switch"
+                aria-checked={theme === 'dark'}
+                aria-label="Toggle theme"
+                className={`theme-toggle ${theme === 'dark' ? 'theme-toggle--dark' : ''}`}
+              >
+                <span className={`toggle-knob ${theme === 'dark' ? 'translate-x-[20px]' : ''}`} />
+                <span className="sr-only">Toggle dark mode</span>
+              </button>
+
+              <div className="prism-glow">
+                <WalletMultiButton className="!bg-white !text-black !h-11 !px-6 !rounded-full !font-semibold !text-sm !transition-all !duration-500 hover:!shadow-[0_0_30px_rgba(0,0,0,0.08)] active:!scale-95" />
+              </div>
             </div>
           )}
         </div>

@@ -14,6 +14,8 @@ import { FloatingInput } from '../../src/components/FloatingInput';
 import { TransactionStepper, type StepStatus } from '../../src/components/TransactionStepper';
 import { StatCard } from '../../src/components/AnimatedCounter';
 import { PageWrapper } from '../../src/components/PageWrapper';
+import { LinkIcon, PenIcon, HourglassIcon, SparkleIcon } from '../../src/components/AnimatedIcons';
+import { motion } from 'framer-motion';
 
 export default function DepositPage() {
   const { publicKey, wallet, connected } = useWallet();
@@ -137,25 +139,25 @@ export default function DepositPage() {
               id: 'wallet',
               label: 'Connect Wallet',
               status: currentStep > 0 ? 'completed' : currentStep === 0 ? 'active' : 'pending',
-              icon: '🔗',
+              icon: LinkIcon,
             },
             {
               id: 'sign',
               label: 'Sign TX',
               status: currentStep > 1 ? 'completed' : currentStep === 1 ? 'active' : 'pending',
-              icon: '✍️',
+              icon: PenIcon,
             },
             {
               id: 'confirm',
               label: 'Confirming',
               status: currentStep > 2 ? 'completed' : currentStep === 2 ? 'active' : 'pending',
-              icon: '⏳',
+              icon: HourglassIcon,
             },
             {
               id: 'complete',
               label: 'Complete',
               status: currentStep >= 3 ? 'completed' : 'pending',
-              icon: '✨',
+              icon: SparkleIcon,
             },
           ]}
         />
@@ -172,11 +174,19 @@ export default function DepositPage() {
         <div className="lg:col-span-2">
           <Card title="Deposit Transaction" badge="Secure">
             <div className="space-y-8">
-                <div className="bg-transparent p-8 rounded-3xl border border-[#e6e9ef]">
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted mb-3 font-bold">Wallet Status</div>
-                  <div className={`text-2xl font-medium tracking-tight ${connected ? 'text-body' : 'text-muted'}`}>
-                    {connected ? '✅ Connected' : '⚠️ Not Connected'}
+                <div className="bg-transparent p-8 rounded-3xl border border-[#e6e9ef] flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-muted mb-3 font-bold">Wallet Status</div>
+                    <div className={`text-2xl font-medium tracking-tight ${connected ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {connected ? 'Connected' : 'Not Connected'}
+                    </div>
                   </div>
+                  <motion.div
+                    animate={{ scale: connected ? [1, 1.1, 1] : 1 }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <div className={`w-3 h-3 rounded-full ${connected ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                  </motion.div>
                 </div>
                 
                 {vaultTokenAccount && (
@@ -210,13 +220,15 @@ export default function DepositPage() {
                 {/* Quick Select Buttons */}
                 <div className="grid grid-cols-4 gap-2">
                   {[25, 50, 75, 100].map((percent) => (
-                    <button
+                    <motion.button
                       key={percent}
                       onClick={() => setAmount(Math.floor(100 * (percent / 100)))}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       className="py-2 px-3 text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 rounded-lg hover:bg-indigo-500/20 transition-all"
                     >
                       {percent}%
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
                 

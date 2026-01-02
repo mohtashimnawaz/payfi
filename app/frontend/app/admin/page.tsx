@@ -5,7 +5,7 @@ import * as anchor from '@coral-xyz/anchor';
 import { getConnection, getAnchorProvider, getProgram } from '../../src/lib/anchor';
 import BentoGrid from '../../src/components/BentoGrid';
 import Card from '../../src/components/Card';
-import PageWrapper from '../../src/components/PageWrapper';
+import { PageWrapper } from '../../src/components/PageWrapper';
 import { ScrollReveal, Parallax } from '../../src/components/ScrollAnimations';
 import { CircularProgress, ComparisonBar, VaultVisualizer } from '../../src/components/DataVisualization';
 import { ShieldIcon, PlugIcon, NetworkIcon } from '../../src/components/AnimatedIcons';

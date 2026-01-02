@@ -6,9 +6,9 @@ import { getConnection, getAnchorProvider, getProgram } from '../../src/lib/anch
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import BentoGrid from '../../src/components/BentoGrid';
 import Card from '../../src/components/Card';
-import FloatingInput from '../../src/components/FloatingInput';
-import TransactionStepper from '../../src/components/TransactionStepper';
-import PageWrapper from '../../src/components/PageWrapper';
+import { FloatingInput } from '../../src/components/FloatingInput';
+import { TransactionStepper } from '../../src/components/TransactionStepper';
+import { PageWrapper } from '../../src/components/PageWrapper';
 import { ScrollReveal, Parallax } from '../../src/components/ScrollAnimations';
 import { PercentageBar, CircularProgress } from '../../src/components/DataVisualization';
 import { ShieldIcon, WalletIcon, LockIcon, CheckmarkIcon } from '../../src/components/AnimatedIcons';

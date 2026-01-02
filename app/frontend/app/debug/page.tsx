@@ -26,23 +26,23 @@ export default function DebugPage(){
 
   return (
     <div className="reveal">
-      <div className="mb-12">
-        <h1 className="text-4xl font-medium text-white mb-4 tracking-tight">Debug Console</h1>
-        <p className="text-white/40 text-lg max-w-2xl">View on-chain protocol state and account debugging.</p>
+      <div className="mb-16">
+        <h1 className="text-5xl font-semibold text-white mb-6 tracking-tighter">Debug <span className="prism-text">Console</span></h1>
+        <p className="text-white/30 text-xl max-w-2xl font-medium leading-relaxed">View on-chain protocol state and account debugging.</p>
       </div>
       
       <BentoGrid>
         <div className="lg:col-span-3">
           <Card title="On-chain Vault State" badge="Developer">
-            <div className="space-y-6">
+            <div className="space-y-8">
               <button 
                 onClick={fetchState}
-                className="btn-secondary w-full py-3 font-medium"
+                className="w-full bg-white/[0.03] hover:bg-white/[0.05] text-white py-4 rounded-2xl font-semibold transition-all border border-white/[0.05]"
               >
                 Refresh State
               </button>
-              <div className="bg-white/[0.02] rounded-2xl p-6 border border-white/[0.05] overflow-x-auto max-h-[500px] overflow-y-auto">
-                <pre className="text-xs font-mono text-white/40 whitespace-pre-wrap break-words leading-relaxed">
+              <div className="bg-white/[0.01] p-8 rounded-3xl border border-white/[0.03] overflow-x-auto max-h-[600px] overflow-y-auto backdrop-blur-md">
+                <pre className="text-xs font-mono text-white/30 whitespace-pre-wrap break-words leading-relaxed">
                   {info ? JSON.stringify(info, null, 2) : 'No data loaded. Click Refresh to fetch.'}
                 </pre>
               </div>

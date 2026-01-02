@@ -84,36 +84,36 @@ export default function DepositPage() {
 
   return (
     <div className="reveal">
-      <div className="mb-12">
-        <h1 className="text-4xl font-medium text-white mb-4 tracking-tight">Deposit Funds</h1>
-        <p className="text-white/40 text-lg max-w-2xl">Securely deposit tokens into the privacy vault with full encryption.</p>
+      <div className="mb-16">
+        <h1 className="text-5xl font-semibold text-white mb-6 tracking-tighter">Deposit <span className="prism-text">Funds</span></h1>
+        <p className="text-white/30 text-xl max-w-2xl font-medium leading-relaxed">Securely deposit tokens into the privacy vault with full encryption.</p>
       </div>
       
       <BentoGrid>
         <div className="lg:col-span-2">
           <Card title="Deposit Transaction" badge="Secure">
-            <div className="space-y-6">
-              <div className="bg-white/[0.02] p-6 rounded-2xl border border-white/[0.05]">
-                <div className="text-xs uppercase tracking-widest text-white/30 mb-2 font-medium">Wallet Status</div>
-                <div className={`text-xl font-medium ${connected ? 'text-white' : 'text-white/20'}`}>
+            <div className="space-y-8">
+              <div className="bg-white/[0.01] p-8 rounded-3xl border border-white/[0.03] backdrop-blur-md">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-3 font-bold">Wallet Status</div>
+                <div className={`text-2xl font-medium tracking-tight ${connected ? 'text-white' : 'text-white/10'}`}>
                   {connected ? 'Connected' : 'Not Connected'}
                 </div>
               </div>
               
               {vaultTokenAccount && (
-                <div className="bg-white/[0.02] p-6 rounded-2xl border border-white/[0.05]">
-                  <div className="text-xs uppercase tracking-widest text-white/30 mb-2 font-medium">Vault Account</div>
-                  <code className="text-xs font-mono text-white/60 break-all">{vaultTokenAccount}</code>
+                <div className="bg-white/[0.01] p-8 rounded-3xl border border-white/[0.03] backdrop-blur-md">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-3 font-bold">Vault Account</div>
+                  <code className="text-xs font-mono text-white/40 break-all leading-relaxed">{vaultTokenAccount}</code>
                 </div>
               )}
               
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-widest text-white/30 font-medium ml-1">Amount (tokens)</label>
+              <div className="space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-bold ml-1">Amount (tokens)</label>
                 <input 
                   type="number" 
                   value={amount} 
                   onChange={(e)=>setAmount(parseInt(e.target.value))} 
-                  className="w-full bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/20 transition-colors"
+                  className="w-full bg-white/[0.01] border border-white/[0.05] rounded-2xl px-6 py-4 text-white text-lg focus:outline-none focus:border-indigo-500/30 transition-all backdrop-blur-md"
                   placeholder="100"
                 />
               </div>
@@ -121,13 +121,13 @@ export default function DepositPage() {
               <button 
                 onClick={handleDeposit} 
                 disabled={!connected}
-                className="btn-primary w-full py-4 text-lg"
+                className="btn-primary w-full py-5 text-xl tracking-tight"
               >
                 Deposit Tokens
               </button>
               
               {status && (
-                <div className={`p-4 rounded-xl border text-sm ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/5 border-red-500/10 text-red-400' : 'bg-white/5 border-white/10 text-white/60'}`}>
+                <div className={`p-5 rounded-2xl border text-sm font-medium ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/[0.02] border-red-500/10 text-red-400/60' : 'bg-white/[0.02] border-white/[0.05] text-white/40'}`}>
                   {status}
                 </div>
               )}
@@ -136,7 +136,7 @@ export default function DepositPage() {
         </div>
 
         <Card title="Instructions" badge="Guide">
-          <ol className="text-sm list-decimal list-inside space-y-4 text-white/40 leading-relaxed">
+          <ol className="text-sm list-decimal list-inside space-y-6 text-white/30 leading-relaxed font-medium">
             <li>Connect a wallet (Phantom or mobile wallet)</li>
             <li>Ensure you have an SPL token account with the same mint as the vault</li>
             <li>Click Deposit to initiate the private transaction</li>

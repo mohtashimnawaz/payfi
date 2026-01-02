@@ -38,17 +38,17 @@ export default function AdminPage(){
 
   return (
     <div className="reveal">
-      <div className="mb-12">
-        <h1 className="text-4xl font-medium text-white mb-4 tracking-tight">Admin Panel</h1>
-        <p className="text-white/40 text-lg max-w-2xl">Protocol initialization and management utilities.</p>
+      <div className="mb-16">
+        <h1 className="text-5xl font-semibold text-white mb-6 tracking-tighter">Admin <span className="prism-text">Panel</span></h1>
+        <p className="text-white/30 text-xl max-w-2xl font-medium leading-relaxed">Protocol initialization and management utilities.</p>
       </div>
       
       <BentoGrid>
         <Card title="Program Initialization" badge="Admin Only">
-          <div className="space-y-6">
-            <div className="bg-white/[0.02] p-6 rounded-2xl border border-white/[0.05]">
-              <div className="text-xs uppercase tracking-widest text-white/30 mb-2 font-medium">Wallet Status</div>
-              <div className={`text-xl font-medium ${connected ? 'text-white' : 'text-white/20'}`}>
+          <div className="space-y-8">
+            <div className="bg-white/[0.01] p-8 rounded-3xl border border-white/[0.03] backdrop-blur-md">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-3 font-bold">Wallet Status</div>
+              <div className={`text-2xl font-medium tracking-tight ${connected ? 'text-white' : 'text-white/10'}`}>
                 {connected ? 'Connected' : 'Not Connected'}
               </div>
             </div>
@@ -56,13 +56,13 @@ export default function AdminPage(){
             <button 
               onClick={handleInitialize} 
               disabled={!connected}
-              className="btn-primary w-full py-4 text-lg"
+              className="btn-primary w-full py-5 text-xl tracking-tight"
             >
               Initialize Protocol
             </button>
             
             {status && (
-              <div className={`p-4 rounded-xl border text-sm ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/5 border-red-500/10 text-red-400' : 'bg-white/5 border-white/10 text-white/60'}`}>
+              <div className={`p-5 rounded-2xl border text-sm font-medium ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/[0.02] border-red-500/10 text-red-400/60' : 'bg-white/[0.02] border-white/[0.05] text-white/40'}`}>
                 {status}
               </div>
             )}
@@ -70,12 +70,12 @@ export default function AdminPage(){
         </Card>
         
         <Card title="Best Practices" badge="Setup">
-          <div className="space-y-4 text-white/40 text-sm leading-relaxed">
+          <div className="space-y-6 text-white/30 text-sm leading-relaxed font-medium">
             <p>For a complete automated setup, run the following command in your terminal:</p>
-            <div className="bg-white/[0.02] p-4 rounded-xl border border-white/[0.05] font-mono text-xs text-white/60 break-all">
+            <div className="bg-white/[0.01] p-6 rounded-2xl border border-white/[0.03] font-mono text-xs text-white/40 break-all leading-relaxed">
               pnpm ts-node scripts/init_devnet.ts
             </div>
-            <p className="text-xs italic">
+            <p className="text-xs italic pt-4 border-t border-white/[0.03]">
               This script handles mint creation, vault setup, and initial funding.
             </p>
           </div>

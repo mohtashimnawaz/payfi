@@ -15,30 +15,32 @@ export default function Header() {
       <div className="container flex items-center justify-between">
         <Link href="/" className="flex items-center gap-4 group">
           <div className="relative w-10 h-10 flex items-center justify-center">
-            {/* Rotating gradient border */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-white/5 to-white/40 rounded-xl animate-spin-slow" />
+            {/* Rotating iridescent border */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl animate-spin-slow opacity-40 group-hover:opacity-100 transition-opacity duration-700" />
             {/* Inner background */}
-            <div className="absolute inset-[1px] bg-[#050505] rounded-[11px] flex items-center justify-center z-10">
+            <div className="absolute inset-[1.5px] bg-[#0a0a14] rounded-[10px] flex items-center justify-center z-10">
               <span className="text-lg font-bold text-white tracking-tighter">P</span>
             </div>
           </div>
-          <span className="text-lg font-medium tracking-tight text-white group-hover:text-white/80 transition-colors">PayFi</span>
+          <span className="text-lg font-medium tracking-tight text-white/90 group-hover:text-white transition-colors">PayFi</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-white/40">
+        <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-white/30">
           {[
             { href: '/', label: 'Dashboard' },
             { href: '/deposit', label: 'Deposit' },
             { href: '/withdraw', label: 'Withdraw' },
             { href: '/admin', label: 'Admin' },
             { href: '/relayer', label: 'Relayer' },
+            { href: '/debug', label: 'Debug' },
           ].map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              className="hover:text-white transition-colors duration-300"
+              className="hover:text-white/80 transition-colors duration-500 relative group"
             >
               {label}
+              <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 group-hover:w-full" />
             </Link>
           ))}
         </nav>
@@ -48,8 +50,8 @@ export default function Header() {
             Devnet
           </div>
           {mounted && (
-            <div className="wallet-wrapper">
-              <WalletMultiButton />
+            <div className="prism-glow">
+              <WalletMultiButton className="!bg-white !text-black !h-11 !px-6 !rounded-full !font-semibold !text-sm !transition-all !duration-500 hover:!shadow-[0_0_30px_rgba(255,255,255,0.2)] active:!scale-95" />
             </div>
           )}
         </div>

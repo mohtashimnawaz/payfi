@@ -2,9 +2,5 @@
   "version": 2,
   "builds": [
     { "src": "package.json", "use": "@vercel/next" }
-  ],
-  "env": {
-    "ANCHOR_PROVIDER_URL": "@anchor_provider_url",
-    "ANCHOR_WALLET": "@anchor_wallet"
-  }
+  ]
 }

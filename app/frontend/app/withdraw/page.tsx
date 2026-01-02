@@ -30,10 +30,10 @@ export default function WithdrawPage() {
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
 
   const steps = [
-    { id: 'proof', label: 'Proof', status: 'pending' as const, icon: ShieldIcon },
-    { id: 'verify', label: 'Verify', status: 'pending' as const, icon: LockIcon },
-    { id: 'sign', label: 'Sign', status: 'pending' as const, icon: WalletIcon },
-    { id: 'complete', label: 'Complete', status: 'pending' as const, icon: CheckmarkIcon },
+    { id: 'proof', label: 'Proof', status: 'pending' as const, icon: <ShieldIcon size={20} className="text-white" animate={false} /> },
+    { id: 'verify', label: 'Verify', status: 'pending' as const, icon: <LockIcon size={20} className="text-white" animate={false} /> },
+    { id: 'sign', label: 'Sign', status: 'pending' as const, icon: <WalletIcon size={20} className="text-white" animate={false} /> },
+    { id: 'complete', label: 'Complete', status: 'pending' as const, icon: <CheckmarkIcon size={20} className="text-white" animate={false} /> },
   ];
 
   const statCards: StatCard[] = [

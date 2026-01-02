@@ -139,25 +139,25 @@ export default function DepositPage() {
               id: 'wallet',
               label: 'Connect Wallet',
               status: currentStep > 0 ? 'completed' : currentStep === 0 ? 'active' : 'pending',
-              icon: LinkIcon,
+              icon: <LinkIcon size={20} className="text-white" animate={false} />,
             },
             {
               id: 'sign',
               label: 'Sign TX',
               status: currentStep > 1 ? 'completed' : currentStep === 1 ? 'active' : 'pending',
-              icon: PenIcon,
+              icon: <PenIcon size={20} className="text-white" animate={false} />,
             },
             {
               id: 'confirm',
               label: 'Confirming',
               status: currentStep > 2 ? 'completed' : currentStep === 2 ? 'active' : 'pending',
-              icon: HourglassIcon,
+              icon: <HourglassIcon size={20} className="text-white" animate={false} />,
             },
             {
               id: 'complete',
               label: 'Complete',
               status: currentStep >= 3 ? 'completed' : 'pending',
-              icon: SparkleIcon,
+              icon: <SparkleIcon size={20} className="text-white" animate={false} />,
             },
           ]}
         />

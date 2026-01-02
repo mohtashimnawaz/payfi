@@ -25,11 +25,13 @@ export default function DebugPage(){
   useEffect(()=>{ fetchState(); }, [connected]);
 
   return (
-    <div>
-      <h1>Debug</h1>
+    <div className="container px-4 py-6 mx-auto">
+      <h1 className="text-4xl font-bold mb-8 text-slate-900">Debug Console</h1>
       <BentoGrid>
-        <Card title="On-chain state">
-          <pre style={{whiteSpace: 'pre-wrap'}}>{JSON.stringify(info, null, 2)}</pre>
+        <Card title="On-chain State">
+          <div className="bg-slate-900 rounded p-4 text-slate-100 text-xs font-mono overflow-x-auto">
+            <pre className="whitespace-pre-wrap">{JSON.stringify(info, null, 2)}</pre>
+          </div>
         </Card>
       </BentoGrid>
     </div>

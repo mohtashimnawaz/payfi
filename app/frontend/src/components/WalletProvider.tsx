@@ -7,7 +7,7 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { DEFAULT_PROVIDER_URL } from "../lib/anchor";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
-export default function Wallet({ children }: { children: React.ReactNode }) {
+export default function WalletProviderComponent({ children }: { children: React.ReactNode }) {
   const [error, setError] = React.useState<string | null>(null);
   const [hasPhantom, setHasPhantom] = React.useState<boolean | null>(null);
   const network = WalletAdapterNetwork.Devnet;
@@ -32,7 +32,7 @@ export default function Wallet({ children }: { children: React.ReactNode }) {
       const sol = (window as any).solana;
       setHasPhantom(Boolean(sol && sol.isPhantom));
       if (!sol || !sol.isPhantom) {
-        setError('Phantom wallet extension not found — install Phantom or use a compatible wallet (or use a mobile wallet).');
+        setError('Phantom wallet extension not found. Please install the Phantom wallet extension.');
       } else {
         setError(null);
       }
@@ -50,7 +50,7 @@ export default function Wallet({ children }: { children: React.ReactNode }) {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect={autoConnect} onError={onError}>
         <WalletModalProvider>
-          {error && <div style={{color: 'crimson', marginTop: 8}}>Wallet error: {error}</div>}
+          {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4 mb-4 text-sm" role="alert">⚠️ {error}</div>}
           {children}
         </WalletModalProvider>
       </WalletProvider>

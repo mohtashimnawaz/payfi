@@ -37,18 +37,24 @@ export default function AdminPage(){
   }
 
   return (
-    <div>
-      <h1>Admin</h1>
+    <div className="container px-4 py-6 mx-auto">
+      <h1 className="text-4xl font-bold mb-8 text-slate-900">Admin Panel</h1>
       <BentoGrid>
         <Card title="Initialize Program">
-          <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
-            <div>Connected: {connected ? 'Yes' : 'No'}</div>
-            <button onClick={handleInitialize} disabled={!connected}>Call Initialize</button>
-            {status && <div style={{marginTop: 8}}>{status}</div>}
+          <div className="flex flex-col gap-4">
+            <div className="text-sm text-slate-600">Connected: <span className={connected ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>{connected ? 'Yes' : 'No'}</span></div>
+            <button 
+              onClick={handleInitialize} 
+              disabled={!connected}
+              className="bg-primary text-white font-semibold rounded px-4 py-2 disabled:opacity-50 hover:bg-accent transition-colors"
+            >
+              Call Initialize
+            </button>
+            {status && <div className="mt-4 p-3 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">{status}</div>}
           </div>
         </Card>
         <Card title="Notes">
-          <p>Use the <code>scripts/init_devnet.ts</code> script for full initialization (recommended).</p>
+          <p className="text-sm text-slate-600 leading-relaxed">Use the <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono text-slate-800">scripts/init_devnet.ts</code> script for full initialization (recommended).</p>
         </Card>
       </BentoGrid>
     </div>

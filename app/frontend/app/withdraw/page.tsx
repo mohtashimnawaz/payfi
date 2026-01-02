@@ -50,20 +50,32 @@ export default function WithdrawPage() {
   }
 
   return (
-    <div>
-      <h1>Withdraw</h1>
+    <div className="container px-4 py-6 mx-auto">
+      <h1 className="text-4xl font-bold mb-8 text-slate-900">Withdraw</h1>
       <BentoGrid>
         <Card title="Withdraw">
-          <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
-            <div>Connected: {connected ? 'Yes' : 'No'}</div>
-            <label>Amount</label>
-            <input type="number" value={amount} onChange={(e)=>setAmount(parseInt(e.target.value))} />
-            <button onClick={handleWithdraw} disabled={!connected}>Withdraw (placeholder)</button>
-            {status && <div style={{marginTop: 8}}>{status}</div>}
+          <div className="flex flex-col gap-4">
+            <div className="text-sm text-slate-600">Connected: <span className={connected ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>{connected ? 'Yes' : 'No'}</span></div>
+            <label className="text-sm font-medium text-slate-700">Amount (tokens)</label>
+            <input 
+              type="number" 
+              value={amount} 
+              onChange={(e)=>setAmount(parseInt(e.target.value))} 
+              className="border border-slate-300 rounded px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Enter amount"
+            />
+            <button 
+              onClick={handleWithdraw} 
+              disabled={!connected}
+              className="bg-primary text-white font-semibold rounded px-4 py-2 disabled:opacity-50 hover:bg-accent transition-colors"
+            >
+              Withdraw (ZK required)
+            </button>
+            {status && <div className="mt-4 p-3 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">{status}</div>}
           </div>
         </Card>
         <Card title="Notes">
-          <p>This page is a placeholder — withdraw flow requires valid ZK proofs or relayer attestations which the frontend can't generate yet.</p>
+          <p className="text-sm text-slate-600 leading-relaxed">This page is a placeholder — withdraw flow requires valid ZK proofs or relayer attestations which the frontend can't generate yet.</p>
         </Card>
       </BentoGrid>
     </div>

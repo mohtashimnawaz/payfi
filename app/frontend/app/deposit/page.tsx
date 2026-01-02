@@ -84,21 +84,21 @@ export default function DepositPage() {
 
   return (
     <div>
-      <h1>Deposit</h1>
+      <h1 className="text-2xl font-bold mb-4">Deposit</h1>
       <BentoGrid>
         <Card title="Deposit">
-          <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
-            <div>Connected: {connected ? 'Yes' : 'No'}</div>
-            <div>Vault token account: {vaultTokenAccount ?? 'unknown'}</div>
-            <label>Amount</label>
-            <input type="number" value={amount} onChange={(e)=>setAmount(parseInt(e.target.value))} />
-            <button onClick={handleDeposit} disabled={!connected}>Deposit</button>
-            {status && <div style={{marginTop: 8}}>{status}</div>}
+          <div className="flex flex-col gap-3">
+            <div className="text-sm text-slate-700">Connected: <span className="font-medium">{connected ? 'Yes' : 'No'}</span></div>
+            <div className="text-sm text-slate-700">Vault token account: <span className="font-mono text-xs">{vaultTokenAccount ?? 'unknown'}</span></div>
+            <label className="text-sm">Amount</label>
+            <input className="border rounded px-3 py-2" type="number" value={amount} onChange={(e)=>setAmount(parseInt(e.target.value))} />
+            <button className="bg-primary text-white px-4 py-2 rounded hover:bg-accent disabled:opacity-50" onClick={handleDeposit} disabled={!connected}>Deposit</button>
+            {status && <div className="mt-2 text-sm text-slate-700">{status}</div>}
           </div>
         </Card>
         <Card title="Instructions">
-          <ol>
-            <li>Connect a wallet (Phantom)</li>
+          <ol className="text-sm list-decimal list-inside text-slate-600">
+            <li>Connect a wallet (Phantom or mobile wallet)</li>
             <li>Ensure you have an SPL token account with the same mint as the vault</li>
             <li>Click Deposit</li>
           </ol>

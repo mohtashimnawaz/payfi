@@ -10,6 +10,17 @@ export default function Header() {
     setMounted(true);
   }, []);
 
+  const [theme, setTheme] = useState<'light'|'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    document.documentElement.classList.toggle('theme-dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   return (
     <header className="header py-6 px-8 mb-16">
       <div className="container flex items-center justify-between">
@@ -18,14 +29,14 @@ export default function Header() {
             {/* Rotating iridescent border */}
             <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-xl animate-spin-slow opacity-40 group-hover:opacity-100 transition-opacity duration-700" />
             {/* Inner background */}
-            <div className="absolute inset-[1.5px] bg-[#0a0a14] rounded-[10px] flex items-center justify-center z-10">
-              <span className="text-lg font-bold text-white tracking-tighter">P</span>
+            <div className="absolute inset-[1.5px] bg-white rounded-[10px] flex items-center justify-center z-10 shadow-sm">
+              <span className="text-lg font-bold text-body tracking-tighter">P</span>
             </div>
           </div>
-          <span className="text-lg font-medium tracking-tight text-white/90 group-hover:text-white transition-colors">PayFi</span>
+          <span className="text-lg font-medium tracking-tight text-body group-hover:text-body transition-colors">PayFi</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-white/30">
+        <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-muted">
           {[
             { href: '/', label: 'Dashboard' },
             { href: '/deposit', label: 'Deposit' },
@@ -37,7 +48,7 @@ export default function Header() {
             <Link
               key={href}
               href={href}
-              className="hover:text-white/80 transition-colors duration-500 relative group"
+              className="hover:text-body transition-colors duration-500 relative group"
             >
               {label}
               <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 group-hover:w-full" />
@@ -46,7 +57,7 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-6">
-          <div className="hidden sm:block text-[11px] font-medium uppercase tracking-widest text-white/20">
+          <div className="hidden sm:block text-[11px] font-medium uppercase tracking-widest text-muted">
             Devnet
           </div>
           {mounted && (

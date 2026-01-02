@@ -14,8 +14,8 @@ export default function Card({
   return (
     <div className={`card group ${className}`}>
       {badge && <div className="badge mb-6">{badge}</div>}
-      <h3 className="text-2xl font-medium text-white mb-4">{title}</h3>
-      <div className="text-white/40 leading-relaxed">
+      <h3 className="text-2xl font-medium text-body mb-4">{title}</h3>
+      <div className="text-muted leading-relaxed">
         {children}
       </div>
     </div>

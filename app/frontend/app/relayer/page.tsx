@@ -80,27 +80,27 @@ export default function RelayerPage() {
   return (
     <div className="reveal">
       <div className="mb-16">
-        <h1 className="text-5xl font-semibold text-white mb-6 tracking-tighter">Relayer <span className="prism-text">Network</span></h1>
-        <p className="text-white/30 text-xl max-w-2xl font-medium leading-relaxed">Register and manage relayers for transaction processing and attestation.</p>
+        <h1 className="text-5xl font-semibold text-body mb-6 tracking-tighter">Relayer <span className="prism-text">Network</span></h1>
+        <p className="text-muted text-xl max-w-2xl font-medium leading-relaxed">Register and manage relayers for transaction processing and attestation.</p>
       </div>
       
       <BentoGrid>
         <Card title="Add Relayer" badge="Registry">
           <div className="space-y-8">
-            <div className="bg-white/[0.01] p-8 rounded-3xl border border-white/[0.03] backdrop-blur-md">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-3 font-bold">Wallet Status</div>
-              <div className={`text-2xl font-medium tracking-tight ${connected ? 'text-white' : 'text-white/10'}`}>
+            <div className="bg-transparent p-8 rounded-3xl border border-[#e6e9ef]">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted mb-3 font-bold">Wallet Status</div>
+              <div className={`text-2xl font-medium tracking-tight ${connected ? 'text-body' : 'text-muted'}`}>
                 {connected ? 'Connected' : 'Not Connected'}
               </div>
             </div>
             
             <div className="space-y-3">
-              <label className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-bold ml-1">Relayer Address (Pubkey)</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-muted font-bold ml-1">Relayer Address (Pubkey)</label>
               <input 
                 type="text" 
                 value={relayerAddr} 
                 onChange={(e)=>setRelayerAddr(e.target.value)} 
-                className="w-full bg-white/[0.01] border border-white/[0.03] rounded-2xl px-6 py-4 text-white placeholder:text-white/10 focus:outline-none focus:border-white/10 transition-colors font-medium"
+                className="w-full bg-transparent border border-[#e6e9ef] rounded-2xl px-6 py-4 text-body placeholder:text-muted focus:outline-none focus:border-[#e6e9ef] transition-colors font-medium"
                 placeholder="Enter public key"
               />
             </div>
@@ -114,7 +114,7 @@ export default function RelayerPage() {
             </button>
             
             {status && (
-              <div className={`p-5 rounded-2xl border text-sm font-medium ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/[0.02] border-red-500/10 text-red-400/60' : 'bg-white/[0.02] border-white/[0.05] text-white/40'}`}>
+              <div className={`p-5 rounded-2xl border text-sm font-medium ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/[0.02] border-red-500/10 text-red-400/60' : 'bg-transparent border border-[#e6e9ef] text-muted'}`}>
                 {status}
               </div>
             )}
@@ -124,23 +124,23 @@ export default function RelayerPage() {
         <Card title="Initialize State" badge="Config">
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-bold ml-1">Withdrawal Limit</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-muted font-bold ml-1">Withdrawal Limit</label>
               <input 
                 type="number" 
                 value={limit} 
                 onChange={(e)=>setLimit(parseInt(e.target.value))} 
-                className="w-full bg-white/[0.01] border border-white/[0.03] rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-white/10 transition-colors font-medium"
+                className="w-full bg-transparent border border-[#e6e9ef] rounded-2xl px-6 py-4 text-body focus:outline-none focus:border-indigo-500/30 transition-colors font-medium"
                 placeholder="1"
               />
             </div>
             
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-bold ml-1">Rate Limit Window (sec)</label>
+              <label className="text-[10px] uppercase tracking-[0.2em] text-muted font-bold ml-1">Rate Limit Window (sec)</label>
               <input 
                 type="number" 
                 value={windowSec} 
                 onChange={(e)=>setWindowSec(parseInt(e.target.value))} 
-                className="w-full bg-white/[0.01] border border-white/[0.03] rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-white/10 transition-colors font-medium"
+                className="w-full bg-transparent border border-[#e6e9ef] rounded-2xl px-6 py-4 text-body focus:outline-none focus:border-indigo-500/30 transition-colors font-medium"
                 placeholder="60"
               />
             </div>
@@ -148,7 +148,7 @@ export default function RelayerPage() {
             <button 
               onClick={handleInitRelayerState} 
               disabled={!connected}
-              className="w-full bg-white/[0.03] hover:bg-white/[0.05] text-white py-4 rounded-2xl font-semibold transition-all border border-white/[0.05]"
+              className="w-full bg-transparent hover:bg-[#f2f4f7] text-body py-4 rounded-2xl font-semibold transition-all border border-[#e6e9ef]"
             >
               Initialize State
             </button>
@@ -160,12 +160,12 @@ export default function RelayerPage() {
             <button 
               onClick={fetchRelayerState} 
               disabled={!relayerAddr}
-              className="w-full bg-white/[0.03] hover:bg-white/[0.05] text-white py-3 rounded-2xl font-semibold transition-all border border-white/[0.05] text-xs"
+              className="w-full bg-transparent hover:bg-[#f2f4f7] text-body py-3 rounded-2xl font-semibold transition-all border border-[#e6e9ef] text-xs"
             >
               Fetch State
             </button>
-            <div className="bg-white/[0.01] p-6 rounded-2xl border border-white/[0.03] overflow-x-auto max-h-48">
-              <pre className="text-[10px] font-mono text-white/30 whitespace-pre-wrap break-words leading-relaxed">
+            <div className="bg-transparent p-6 rounded-2xl border border-[#e6e9ef] overflow-x-auto max-h-48">
+              <pre className="text-[10px] font-mono text-muted whitespace-pre-wrap break-words leading-relaxed">
                 {relayerStateInfo ? JSON.stringify(relayerStateInfo, null, 2) : 'No data loaded.'}
               </pre>
             </div>

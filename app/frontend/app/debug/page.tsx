@@ -27,8 +27,8 @@ export default function DebugPage(){
   return (
     <div className="reveal">
       <div className="mb-16">
-        <h1 className="text-5xl font-semibold text-white mb-6 tracking-tighter">Debug <span className="prism-text">Console</span></h1>
-        <p className="text-white/30 text-xl max-w-2xl font-medium leading-relaxed">View on-chain protocol state and account debugging.</p>
+        <h1 className="text-5xl font-semibold text-body mb-6 tracking-tighter">Debug <span className="prism-text">Console</span></h1>
+        <p className="text-muted text-xl max-w-2xl font-medium leading-relaxed">View on-chain protocol state and account debugging.</p>
       </div>
       
       <BentoGrid>
@@ -37,12 +37,12 @@ export default function DebugPage(){
             <div className="space-y-8">
               <button 
                 onClick={fetchState}
-                className="w-full bg-white/[0.03] hover:bg-white/[0.05] text-white py-4 rounded-2xl font-semibold transition-all border border-white/[0.05]"
+                className="w-full bg-transparent hover:bg-[#f2f4f7] text-body py-4 rounded-2xl font-semibold transition-all border border-[#e6e9ef]"
               >
                 Refresh State
               </button>
-              <div className="bg-white/[0.01] p-8 rounded-3xl border border-white/[0.03] overflow-x-auto max-h-[600px] overflow-y-auto backdrop-blur-md">
-                <pre className="text-xs font-mono text-white/30 whitespace-pre-wrap break-words leading-relaxed">
+              <div className="bg-transparent p-8 rounded-3xl border border-[#e6e9ef] overflow-x-auto max-h-[600px] overflow-y-auto">
+                <pre className="text-xs font-mono text-muted whitespace-pre-wrap break-words leading-relaxed">
                   {info ? JSON.stringify(info, null, 2) : 'No data loaded. Click Refresh to fetch.'}
                 </pre>
               </div>

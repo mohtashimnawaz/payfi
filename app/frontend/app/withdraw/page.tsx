@@ -52,32 +52,31 @@ export default function WithdrawPage() {
   return (
     <div className="reveal">
       <div className="mb-16">
-        <h1 className="text-5xl font-semibold text-white mb-6 tracking-tighter">Withdraw <span className="prism-text">Funds</span></h1>
-        <p className="text-white/30 text-xl max-w-2xl font-medium leading-relaxed">Withdraw tokens with valid zero-knowledge proofs or relayer attestation.</p>
+        <h1 className="text-5xl font-semibold text-body mb-6 tracking-tighter">Withdraw <span className="prism-text">Funds</span></h1>
+        <p className="text-muted text-xl max-w-2xl font-medium leading-relaxed">Withdraw tokens with valid zero-knowledge proofs or relayer attestation.</p>
       </div>
       
       <BentoGrid>
         <div className="lg:col-span-2">
           <Card title="Withdrawal Request" badge="Private">
             <div className="space-y-8">
-              <div className="bg-white/[0.01] p-8 rounded-3xl border border-white/[0.03] backdrop-blur-md">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-3 font-bold">Wallet Status</div>
-                <div className={`text-2xl font-medium tracking-tight ${connected ? 'text-white' : 'text-white/10'}`}>
+              <div className="bg-transparent p-8 rounded-3xl border border-[#e6e9ef]">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted mb-3 font-bold">Wallet Status</div>
+                <div className={`text-2xl font-medium tracking-tight ${connected ? 'text-body' : 'text-muted'}`}>
                   {connected ? 'Connected' : 'Not Connected'}
                 </div>
               </div>
               
               <div className="space-y-3">
-                <label className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-bold ml-1">Amount (tokens)</label>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-muted font-bold ml-1">Amount (tokens)</label>
                 <input 
                   type="number" 
                   value={amount} 
                   onChange={(e)=>setAmount(parseInt(e.target.value))} 
-                  className="w-full bg-white/[0.01] border border-white/[0.05] rounded-2xl px-6 py-4 text-white text-lg focus:outline-none focus:border-indigo-500/30 transition-all backdrop-blur-md"
+                  className="w-full bg-transparent border border-[#e6e9ef] rounded-2xl px-6 py-4 text-body text-lg focus:outline-none focus:border-indigo-500/30 transition-all"
                   placeholder="100"
                 />
-              </div>
-              
+              </div>              
               <button 
                 onClick={handleWithdraw} 
                 disabled={!connected}
@@ -87,7 +86,7 @@ export default function WithdrawPage() {
               </button>
               
               {status && (
-                <div className={`p-5 rounded-2xl border text-sm font-medium ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/[0.02] border-red-500/10 text-red-400/60' : 'bg-white/[0.02] border-white/[0.05] text-white/40'}`}>
+                <div className={`p-5 rounded-2xl border text-sm font-medium ${status.includes('failed') || status.includes('Failed') ? 'bg-red-500/[0.02] border-red-500/10 text-red-400/60' : 'bg-transparent border border-[#e6e9ef] text-muted'}`}>
                   {status}
                 </div>
               )}
@@ -96,14 +95,14 @@ export default function WithdrawPage() {
         </div>
 
         <Card title="Requirements" badge="Important">
-          <div className="space-y-6 text-white/30 text-sm leading-relaxed font-medium">
+          <div className="space-y-6 text-muted text-sm leading-relaxed font-medium">
             <p>This withdrawal flow requires:</p>
             <ul className="space-y-3 list-disc list-inside">
               <li>Valid zero-knowledge proofs</li>
               <li>Relayer attestation (if applicable)</li>
               <li>Sufficient vault liquidity</li>
             </ul>
-            <p className="pt-6 border-t border-white/[0.03] text-xs italic">
+            <p className="pt-6 border-t border-[#e6e9ef] text-xs italic">
               Note: This is a placeholder UI for demonstration purposes.
             </p>
           </div>
